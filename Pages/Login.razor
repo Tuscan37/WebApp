@@ -1,0 +1,51 @@
+﻿@page "/Login"
+
+<PageTitle>Le Epic Lonig Paeg</PageTitle>
+
+<head>
+<style>
+.center {
+  margin: auto;
+  width: 30%;
+}
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+</head>
+<body>
+<div class="center">
+    
+    <img src="/Res/krater.png" id="logo" alt="Gąsienica paląca papierosa" width="200px" height="267px">
+    
+    <form id="login-form" name="login-form" method="post" class="propform" action="/">
+    <table>
+        <tbody>
+        <tr class="form-group row">
+            <td class="title" style="display: none;"><label for="login">Nazwa</label>
+            </td>
+            <td><input name="_user" id="login" required="" size="40" autocapitalize="none" type="text" class="form-control" placeholder="Nazwa Użytkownika"></td>
+        </tr>
+        <tr class="form-group row">
+            <td class="title" style="display: none;"><label for="password">Hasło</label>
+            </td>
+            <td><input name="_pass" id="password" required="" size="40" autocapitalize="none" type="password" class="form-control" placeholder="Hasło"></td>
+        </tr>
+        </tbody>
+    </table>
+    <br />
+    <p class="formbuttons"><button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg text-uppercase w-100">Zaloguj</button>
+    </p>
+    </form>
+    <br />
+</div>
+</body>
+
+
+
+@code {
+        
+
+}
