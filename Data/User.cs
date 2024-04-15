@@ -1,12 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.InteropServices;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebAppSzczegielniak.Data;
 
 public class User
 {
-    [Key] public int id { get; set; }
-    public string username { get; set; } = String.Empty;
-    public string password { get; set; } = String.Empty;
-
+    [Key] public int Id { get; set; }
+    [MaxLength(32)] public string Username { get; set; } = String.Empty;
+    [MaxLength(32)] public string Password { get; set; } = String.Empty;
 }

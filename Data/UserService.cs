@@ -19,7 +19,7 @@ namespace WebAppSzczegielniak.Services
 
         public async Task<User> GetUserByUsername(string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.username == username);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
 
         public async Task<List<User>> GetAllUsers()
@@ -43,7 +43,7 @@ namespace WebAppSzczegielniak.Services
         }
         public bool IsUsernameTaken(string username)
         {
-            return _context.Users.Any(u => u.username == username);
+            return _context.Users.Any(u => u.Username == username);
         }
     }
 }

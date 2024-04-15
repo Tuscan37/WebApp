@@ -3,14 +3,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace WebAppSzczegielniak.Data;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
     }
-
     public DbSet<User> Users { get; set; }
-    private DbSet<Project> Projects { get; set; }
-    private DbSet<Assignment> Assignments { get; set; }
+    public DbSet<Project> Projects { get; set; }
+    public DbSet<Assignment> Assignments { get; set; }
 }

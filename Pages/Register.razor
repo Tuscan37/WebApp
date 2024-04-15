@@ -27,13 +27,13 @@ img {
     <DataAnnotationsValidator />
 
     <div class="form-group">
-        <InputText @bind-Value="user.username" class="form-control" placeholder="Nazwa Użytkownika" />
-        <ValidationMessage For="@(() => user.username)" />
+        <InputText @bind-Value="user.Username" class="form-control" placeholder="Nazwa Użytkownika" />
+        <ValidationMessage For="@(() => user.Username)" />
     </div>
 
     <div class="form-group">
-        <InputText @bind-Value="user.password" type="password" class="form-control" placeholder="Hasło" />
-        <ValidationMessage For="@(() => user.password)" />
+        <InputText @bind-Value="user.Password" type="password" class="form-control" placeholder="Hasło" />
+        <ValidationMessage For="@(() => user.Password)" />
     </div>
 
     <div class="form-group">
@@ -65,7 +65,7 @@ img {
 
     private async Task RegisterUser()
     {
-        if (user.password != confirmPassword)
+        if (user.Password != confirmPassword)
         {
             registrationStatus = RegistrationStatus.Error;
             registrationMessage = "Podane hasła nie są identyczne.";
@@ -73,7 +73,7 @@ img {
             return;
         }
 
-        if (userService.IsUsernameTaken(user.username))
+        if (userService.IsUsernameTaken(user.Username))
         {
             registrationStatus = RegistrationStatus.Error;
             registrationMessage = "Nazwa użytkownika jest już zajęta.";
