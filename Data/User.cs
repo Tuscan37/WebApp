@@ -1,6 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.InteropServices;
-using System.ComponentModel.DataAnnotations;
 
 namespace WebAppSzczegielniak.Data;
 
