@@ -10,6 +10,7 @@
 
     <ItemGroup>
         <None Update="app.db" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true"/>
+        <None Remove="WebAppTestProject\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -23,6 +24,27 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.27"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.27"/>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0-preview.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="WebAppTestProject\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="WebAppTestProject\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="WebAppTestProject\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="WebAppTestProject\bin\Debug\net8.0\WebAppTestProject.deps.json" />
+      <_ContentIncludedByDefault Remove="WebAppTestProject\bin\Debug\net8.0\WebAppTestProject.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="WebAppTestProject\obj\Debug\net8.0\WebAppTestProject.sourcelink.json" />
+      <_ContentIncludedByDefault Remove="WebAppTestProject\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="WebAppTestProject\obj\project.packagespec.json" />
+      <_ContentIncludedByDefault Remove="WebAppTestProject\obj\WebAppTestProject.csproj.nuget.dgspec.json" />
     </ItemGroup>
 
 </Project>
