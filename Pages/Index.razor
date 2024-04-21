@@ -1,9 +1,40 @@
 ﻿@page "/"
 
 <PageTitle>Index</PageTitle>
+<style>
+.center {
+  margin: auto;
+}
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+@if (logged)
+{
+    <style>
+        body { background: white !important; }
+    </style>
+    <div style="text-align: center;">
+        <h1>Projekty</h1>
+        <p class="formbuttons">
+            <button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg text-uppercase w-30">Kliknij, aby dodać nowy projekt</button>
+        </p>
+    </div>
+}
+else
+{
+    <style>
+        body { background: red !important; }
+    </style>
+    <div class="center">
+        <img src="/Res/sotp.png" id="sotp" width="90%" height="90%">
+    </div>
+}
 
-<center><h1>Projekty</h1></center>
+@code{
 
-Welcome to WebAppSzczegielniak.
-
-@*<SurveyPrompt Title="How is Blazor working for you?"/>*@
+    public static bool logged = true;
+    
+}

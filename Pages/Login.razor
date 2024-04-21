@@ -1,4 +1,5 @@
 ﻿@page "/Login"
+@using WebAppSzczegielniak.Data
 
 <PageTitle>Le Epic Lonig Paeg</PageTitle>
 
@@ -20,25 +21,23 @@ img {
     
     <img src="/Res/krater.png" id="logo" alt="Gąsienica paląca papierosa" width="200px" height="267px">
     
-    <form id="login-form" name="login-form" method="post" class="propform" action="/">
-    <table>
-        <tbody>
-        <tr class="form-group row">
-            <td class="title" style="display: none;"><label for="login">Nazwa</label>
-            </td>
-            <td><input name="_user" id="login" required="" size="40" autocapitalize="none" type="text" class="form-control" placeholder="Nazwa Użytkownika"></td>
-        </tr>
-        <tr class="form-group row">
-            <td class="title" style="display: none;"><label for="password">Hasło</label>
-            </td>
-            <td><input name="_pass" id="password" required="" size="40" autocapitalize="none" type="password" class="form-control" placeholder="Hasło"></td>
-        </tr>
-        </tbody>
-    </table>
-    <br />
-    <p class="formbuttons"><button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg text-uppercase w-100">Zaloguj</button>
-    </p>
-    </form>
+    <EditForm Model="@user" OnValidSubmit="@LoginUser">
+        <DataAnnotationsValidator />
+    
+        <div class="form-group">
+            <InputText @bind-Value="user.Username" class="form-control" placeholder="Nazwa Użytkownika" />
+            <ValidationMessage For="@(() => user.Username)" />
+        </div>
+    
+        <div class="form-group">
+            <InputText @bind-Value="user.Password" type="password" class="form-control" placeholder="Hasło" />
+            <ValidationMessage For="@(() => user.Password)" />
+        </div>
+        <br />
+         <p class="formbuttons"><button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg text-uppercase w-100">Zaloguj</button>
+        </p>
+        <br />
+    </EditForm>
     <br />
 </div>
 </body>
@@ -46,6 +45,11 @@ img {
 
 
 @code {
+    private User user = new User();
+
+    private async Task LoginUser()
+    {
         
+    }
 
 }

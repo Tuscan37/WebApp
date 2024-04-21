@@ -1,19 +1,18 @@
 ﻿@page "/counter"
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Dummy Login Checker</PageTitle>
 
-<h1>Counter</h1>
+<h1>Dummy Login Checker</h1>
 
-<p role="status">Current count: @currentCount</p>
+<p role="status">Logged In: @Index.logged</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="Toggle">Click me</button>
 
 @code {
-    private int currentCount = 0;
 
-    private void IncrementCount()
+    private void Toggle()
     {
-        currentCount++;
+        Index.logged = !Index.logged;
     }
 
 }
