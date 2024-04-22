@@ -24,7 +24,7 @@ builder.Services
 builder.Services.AddSingleton<WeatherForecastService>();
 
 builder.Services.AddScoped<UserService>();
-
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
