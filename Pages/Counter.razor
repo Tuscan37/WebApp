@@ -4,15 +4,20 @@
 
 <h1>Dummy Login Checker</h1>
 
-<p role="status">Logged In: @Index.logged</p>
+<p role="status">Logged In: @Index.logged Admin: @Index.admin</p>
 
-<button class="btn btn-primary" @onclick="Toggle">Click me</button>
+<button class="btn btn-primary" @onclick="Toggle">Click me to toggle logged</button>
+<button class="btn btn-primary 2" @onclick="ToggleAdmin">Click me to toggle admin</button>
 
 @code {
 
     private void Toggle()
     {
         Index.logged = !Index.logged;
+    }
+    private void ToggleAdmin()
+    {
+        Index.admin = !Index.admin;
     }
 
 }
