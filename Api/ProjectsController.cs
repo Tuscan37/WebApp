@@ -51,8 +51,15 @@ public class ProjectsController : ControllerBase
 
     // nowy projekt
     [HttpPost]
-    public async Task<ActionResult<Project>> CreateProject(Project project)
+    public async Task<ActionResult<Project>> CreateProject(string projectName, string description, DateTime deadline)
     {
+        var project = new Project
+        {
+            ProjectName = projectName,
+            Description = description,
+            DeadlineDateTime = deadline,
+            CreationDateTime = DateTime.UtcNow
+        };
         _context.Projects.Add(project);
         await _context.SaveChangesAsync();
 
