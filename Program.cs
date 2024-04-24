@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using WebAppSzczegielniak.Areas.Identity;
@@ -28,6 +27,9 @@ builder.Services.AddSingleton<WeatherForecastService>();
 
 builder.Services.AddScoped<UserService>();
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
 var config = builder.Configuration;
 builder.Services.AddAuthentication(x =>
 {
@@ -78,5 +80,8 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.Run();
