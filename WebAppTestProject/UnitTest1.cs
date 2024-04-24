@@ -2,43 +2,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace WebAppTestProject;
 using WebAppSzczegielniak.Data;
-public class UnitTest1 : IDisposable
+[Collection("Sequential")]
+public class UnitTest1 : BaseUnitTest
 {
-    private const string ConnectionString = "Server=127.0.0.1;Port=5432;Database=webappszczegielniaktest;User Id=appuser;Password=1234";
-    private readonly ApplicationDbContext _context;
-
-    public UnitTest1()
-    {
-        _context = new ApplicationDbContext(
-            new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseNpgsql(ConnectionString)
-                .Options);
-        _context.Database.EnsureDeleted();
-        _context.Database.Migrate();
-
-    }
-
-    public void Dispose()
-    {
-        _context.Database.EnsureDeleted();
-        _context.Dispose();
-    }
     [Fact]
     public async Task Test1()
     {
-        _context.Users.Add(new User
+        Context.Users.Add(new User
         {
             Username = "Jan",
             Password = "1234"
         });
-        var project = _context.Projects.Add(new Project
+        var project = Context.Projects.Add(new Project
         {
             ProjectName = "WebApp",
             CreationDateTime = DateTime.UtcNow,
             DeadlineDateTime = DateTime.UtcNow.AddDays(60),
             Description = "cool app"
         });
-        _context.Assignments.Add(new Assignment
+        Context.Assignments.Add(new Assignment
         {
             Project = project.Entity,
             Description = "add some feature",
@@ -47,9 +29,9 @@ public class UnitTest1 : IDisposable
             Name = "Add Some Feature!!"
 
         });
-        await _context.SaveChangesAsync();
+        await Context.SaveChangesAsync();
 
-        var assignmentInDb = await _context.Assignments.Include(a =>a.Project).FirstAsync();
+        var assignmentInDb = await Context.Assignments.Include(a =>a.Project).FirstAsync();
         Assert.Equal(project.Entity.Id,assignmentInDb.Project.Id);
 
     }
