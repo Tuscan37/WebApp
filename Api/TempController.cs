@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebAppSzczegielniak.Data;
@@ -30,6 +31,15 @@ public class TempController : ControllerBase
             Id = 420
         });
         return token;
+    }
+
+    [HttpGet("tempReadClaims")]
+    [Authorize]
+    public ActionResult<string> ReadClaims()
+    {
+        string id = User.FindFirstValue("userId")!;
+        string role = User.FindFirstValue(ClaimTypes.Role)!;
+        return Ok(new { id, role });
     }
     
 }

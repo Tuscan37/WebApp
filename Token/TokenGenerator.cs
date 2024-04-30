@@ -27,7 +27,8 @@ public class TokenGenerator
 
         var claims = new List<Claim>
         {
-            new("userId",user.Id.ToString())
+            new("userId",user.Id.ToString()),
+            new(ClaimTypes.Role,"User")
         };
 
         JwtSecurityToken token = new JwtSecurityToken(issuer,audience,claims,expires:expires,signingCredentials:credentials);
