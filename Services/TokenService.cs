@@ -18,7 +18,7 @@ public class TokenService
         _httpContextAccessor = httpContextAccessor;
     }
     
-    public string GenerateToken(User user)
+    public string GenerateToken(User user, string role="User")
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSettings:Key"]!));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -30,7 +30,7 @@ public class TokenService
         var claims = new List<Claim>
         {
             new("Id",user.Id.ToString()),
-            new(ClaimTypes.Role,"User")
+            new(ClaimTypes.Role,role)
         };
 
         JwtSecurityToken token = new JwtSecurityToken(issuer,audience,claims,expires:expires,signingCredentials:credentials);

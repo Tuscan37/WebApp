@@ -20,7 +20,14 @@ public class TempController : ControllerBase
     [HttpGet("temp1")]
     public ActionResult<String> Temp1()
     {
-        return "Cool!";
+        return "You are a regular user!";
+    }
+        
+    [Authorize(Roles = "Admin")]
+    [HttpGet("temp2")]
+    public ActionResult<String> Temp2()
+    {
+        return "You are an administrator!";
     }
 
     [HttpPost("tempLogin")]
@@ -30,6 +37,16 @@ public class TempController : ControllerBase
         {
             Id = 420,
         });
+        return token;
+    }
+    
+    [HttpPost("tempLoginAdmin")]
+    public ActionResult<String> TempLoginAdmin()
+    {
+        string token = _tokenService.GenerateToken(new User
+        {
+            Id = 420,
+        },"Admin");
         return token;
     }
 
