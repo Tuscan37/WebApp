@@ -5,7 +5,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using WebAppSzczegielniak.Data;
 using WebAppSzczegielniak.Services;
-using WebAppSzczegielniak.Token;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,8 +17,9 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UserService>();
-builder.Services.AddSingleton<TokenGenerator>();
+builder.Services.AddSingleton<TokenService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>

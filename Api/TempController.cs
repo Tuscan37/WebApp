@@ -2,7 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebAppSzczegielniak.Data;
-using WebAppSzczegielniak.Token;
+using WebAppSzczegielniak.Services;
 
 namespace WebAppSzczegielniak.Api;
 
@@ -10,10 +10,10 @@ namespace WebAppSzczegielniak.Api;
 [Route("api/temp")]
 public class TempController : ControllerBase
 {
-    private readonly TokenGenerator _tokenGenerator;
-    public TempController([FromServices] TokenGenerator tokenGenerator)
+    private readonly TokenService _tokenService;
+    public TempController([FromServices] TokenService tokenService)
     {
-        _tokenGenerator = tokenGenerator;
+        _tokenService = tokenService;
     }
     
     [Authorize]
@@ -26,9 +26,9 @@ public class TempController : ControllerBase
     [HttpPost("tempLogin")]
     public ActionResult<String> TempLogin()
     {
-        string token = _tokenGenerator.GenerateToken(new User
+        string token = _tokenService.GenerateToken(new User
         {
-            Id = 420
+            Id = 420,
         });
         return token;
     }
@@ -37,8 +37,8 @@ public class TempController : ControllerBase
     [Authorize]
     public ActionResult<string> ReadClaims()
     {
-        string id = User.FindFirstValue("userId")!;
-        string role = User.FindFirstValue(ClaimTypes.Role)!;
+        string id = _tokenService.GetId()!;
+        string role = _tokenService.GetRole()!;
         return Ok(new { id, role });
     }
     

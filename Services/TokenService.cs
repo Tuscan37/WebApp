@@ -4,16 +4,18 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using WebAppSzczegielniak.Data;
 
-namespace WebAppSzczegielniak.Token;
+namespace WebAppSzczegielniak.Services;
 
-public class TokenGenerator
+public class TokenService
 {
     private static readonly TimeSpan TokenLifetime = TimeSpan.FromHours(8);
     
     private readonly IConfiguration _config;
-    public TokenGenerator(IConfiguration config)
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    public TokenService(IConfiguration config,IHttpContextAccessor httpContextAccessor)
     {
         _config = config;
+        _httpContextAccessor = httpContextAccessor;
     }
     
     public string GenerateToken(User user)
@@ -27,13 +29,22 @@ public class TokenGenerator
 
         var claims = new List<Claim>
         {
-            new("userId",user.Id.ToString()),
+            new("Id",user.Id.ToString()),
             new(ClaimTypes.Role,"User")
         };
 
         JwtSecurityToken token = new JwtSecurityToken(issuer,audience,claims,expires:expires,signingCredentials:credentials);
         return new JwtSecurityTokenHandler().WriteToken(token);
+        
+    }
 
+    public string? GetId()
+    {
+        return _httpContextAccessor?.HttpContext?.User.FindFirstValue("Id");
+    }
 
+    public string? GetRole()
+    {
+        return _httpContextAccessor?.HttpContext?.User.FindFirstValue(ClaimTypes.Role);
     }
 }
