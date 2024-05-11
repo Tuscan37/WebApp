@@ -1,0 +1,78 @@
+﻿@page "/"
+@using WebApp.Shared.Dto
+@using Newtonsoft.Json
+@using WebApp.Client.Components
+@inject HttpClient HttpClient
+
+<PageTitle>Home</PageTitle>
+
+<style>
+.center {
+  margin: auto;
+}
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+@if (logged)
+{
+    
+    <style>
+        body { background: white !important; }
+    </style>
+    <div style="text-align: center;">
+        <h1>Projekty</h1>
+        @if (admin)
+        {
+            <button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg text-uppercase w-30" @onclick="() => ModalDialog.Open()">Kliknij, aby dodać nowy projekt</button>
+            <ModalDialog @ref="ModalDialog" Title="Hello World">
+                <div class="row">
+                    <h3>Lorem Ipsum</h3>
+                    <hr>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vel ultricies sapien. Duis nec nunc erat. Vivamus eget sem tristique, lacinia mi id, cursus eros.</p>
+                    <button class="btn btn-primary"  @onclick="() => ModalDialog.Close()">Close</button>
+                </div>
+            </ModalDialog>
+        }
+    </div>
+    
+    
+    
+}
+else
+{
+    <style>
+        body { background: red !important; }
+    </style>
+    <div class="center">
+        <img src="/Res/sotp.png" id="sotp" width="90%" height="90%">
+    </div>
+}
+@data
+
+@code{
+    
+    public static bool logged = true;
+    public static bool admin = true;
+
+    @code {
+        private ModalDialog ModalDialog { get; set; }
+    }
+    
+    public string data = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await HttpClient.GetAsync("/api/projects");
+        var stringToDeserialize = await result.Content.ReadAsStringAsync();
+        var projects = JsonConvert.DeserializeObject<List<ProjectDto>>(stringToDeserialize);
+        
+        foreach (var project in projects)
+        {
+            data += project.ProjectName + " | ";
+        }
+    }
+
+}
