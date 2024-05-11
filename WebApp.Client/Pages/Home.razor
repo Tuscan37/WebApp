@@ -2,7 +2,9 @@
 @using WebApp.Shared.Dto
 @using Newtonsoft.Json
 @using WebApp.Client.Components
+@using WebApp.Client.Services
 @inject HttpClient HttpClient
+@inject ProjectService ProjectService
 
 <PageTitle>Home</PageTitle>
 
@@ -65,9 +67,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await HttpClient.GetAsync("/api/projects");
-        var stringToDeserialize = await result.Content.ReadAsStringAsync();
-        var projects = JsonConvert.DeserializeObject<List<ProjectDto>>(stringToDeserialize);
+        var projects = await ProjectService.GetProjectsAsync();
         
         foreach (var project in projects)
         {
