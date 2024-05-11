@@ -23,6 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\App.Server\App.Server.csproj" />
       <ProjectReference Include="..\WebAppSzczegielniak.csproj" />
     </ItemGroup>
 
