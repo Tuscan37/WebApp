@@ -1,7 +1,6 @@
-﻿@page "/Register"
-@using WebAppSzczegielniak.Data
-@using WebAppSzczegielniak.Services
-@inject UserService userService
+@page "/Register"
+@inject HttpClient HttpClient
+@using WebApp.Shared.Dto
 
 <PageTitle>Rejestracja nowego użytkownika</PageTitle>
 @*<h3>Rejestracja nowego użytkownika</h3>*@
@@ -57,7 +56,7 @@ img {
 </body>
 
 @code {
-    private User user = new User();
+    private UserDto user = new UserDto();
     private string confirmPassword;
     private RegistrationStatus registrationStatus = RegistrationStatus.None;
     private string registrationMessage = "";
@@ -73,15 +72,16 @@ img {
             return;
         }
 
-        if (userService.IsUsernameTaken(user.Username))
-        {
-            registrationStatus = RegistrationStatus.Error;
-            registrationMessage = "Nazwa użytkownika jest już zajęta.";
-            statusClass = "alert-danger";
-            return;
-        }
+        // TODO Zamienić userService na żądanie Http do API
+        //if (userService.IsUsernameTaken(user.Username))
+        //{
+        //    registrationStatus = RegistrationStatus.Error;
+        //    registrationMessage = "Nazwa użytkownika jest już zajęta.";
+        //    statusClass = "alert-danger";
+        //    return;
+        //}
 
-        await userService.RegisterUser(user);
+        //await userService.RegisterUser(user);
 
         registrationStatus = RegistrationStatus.Success;
         registrationMessage = "Rejestracja zakończona sukcesem!";

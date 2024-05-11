@@ -1,6 +1,6 @@
-﻿@page "/Login"
-@using WebAppSzczegielniak.Data
-
+@page "/Login"
+@inject HttpClient HttpClient
+@using WebApp.Shared.Dto
 <PageTitle>Le Epic Lonig Paeg</PageTitle>
 
 <head>
@@ -45,7 +45,7 @@ img {
 
 
 @code {
-    private User user = new User();
+    private UserDto user = new UserDto();
 
     private async Task LoginUser()
     {
