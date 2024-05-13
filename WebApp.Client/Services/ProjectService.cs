@@ -1,0 +1,22 @@
+using Newtonsoft.Json;
+using WebApp.Shared.Dto;
+
+namespace WebApp.Client.Services;
+
+public class ProjectService(HttpClient httpClient)
+{
+    private const string BaseUrl = "/api/projects";
+
+    public async Task<List<ProjectDto>> GetProjectsAsync()
+    {
+        var response = await httpClient.GetAsync(BaseUrl);
+        return JsonConvert.DeserializeObject<List<ProjectDto>>(await response.Content.ReadAsStringAsync())!;
+    }
+    public async Task<ProjectDto> GetProjectByIdAsync(int id)
+    {
+        var response = await httpClient.GetAsync($"{BaseUrl}/{id.ToString()}");
+        return JsonConvert.DeserializeObject<ProjectDto>(await response.Content.ReadAsStringAsync())!;
+    }
+    
+
+}
