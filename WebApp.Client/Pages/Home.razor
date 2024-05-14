@@ -1,8 +1,7 @@
 ﻿@page "/"
-@using WebApp.Shared.Dto
-@using Newtonsoft.Json
 @inject HttpClient HttpClient
 @inject ProjectService ProjectService
+@inject AuthenticationStateProvider StateProvider
 
 <PageTitle>Home</PageTitle>
 
@@ -16,55 +15,66 @@ img {
   margin-right: auto;
 }
 </style>
-@if (logged)
-{
-    
-    <style>
-        body { background: white !important; }
-    </style>
-    <div style="text-align: center;">
-        <h1>Projekty</h1>
-        @if (admin)
-        {
-            <button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg text-uppercase w-30" @onclick="() => ModalDialog.Open()">Kliknij, aby dodać nowy projekt</button>
-            <ModalDialog @ref="ModalDialog" Title="Hello World">
-                <div class="row">
-                    <h3>Lorem Ipsum</h3>
-                    <hr>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vel ultricies sapien. Duis nec nunc erat. Vivamus eget sem tristique, lacinia mi id, cursus eros.</p>
-                    <button class="btn btn-primary"  @onclick="() => ModalDialog.Close()">Close</button>
+
+    <AuthorizeView>
+        <Authorized>
+            
+            <style>
+                    body { background: white !important; }
+                </style>
+                <div style="text-align: center;">
+                    <h1>Projekty</h1>
+                    @if (admin)
+                    {
+                        <button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg text-uppercase w-30" @onclick="() => ModalDialog.Open()">Kliknij, aby dodać nowy projekt</button>
+                        <ModalDialog @ref="ModalDialog" Title="Hello World">
+                            <div class="row">
+                                <h3>Lorem Ipsum</h3>
+                                <hr>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vel ultricies sapien. Duis nec nunc erat. Vivamus eget sem tristique, lacinia mi id, cursus eros.</p>
+                                <button class="btn btn-primary"  @onclick="() => ModalDialog.Close()">Close</button>
+                            </div>
+                        </ModalDialog>
+                    }
                 </div>
-            </ModalDialog>
-        }
-    </div>
-    
-    
-    
-}
-else
-{
-    <style>
-        body { background: red !important; }
-    </style>
-    <div class="center">
-        <img src="/Res/sotp.png" id="sotp" width="90%" height="90%">
-    </div>
-}
+            
+            @foreach (var x in @context.User.Claims)
+            {
+                <p>@x.Type @x.Value</p>
+            }
+            
+            <p>Token: @accessToken</p>
+        </Authorized>
+        <NotAuthorized>
+                <style>
+                    body { background: red !important; }
+                </style>
+                <div class="center">
+                    <img src="/Res/sotp.png" id="sotp" width="90%" height="90%">
+                </div>
+        </NotAuthorized>
+    </AuthorizeView>
+
 @data
 
 @code{
     
-    public static bool logged = true;
-    public static bool admin = true;
-
-    @code {
-        private ModalDialog ModalDialog { get; set; }
-    }
+    bool admin = true;
     
-    public string data = "";
+    private ModalDialog ModalDialog { get; set; }
+    
+    string data = "";
+    string accessToken = "";
 
     protected override async Task OnInitializedAsync()
     {
+
+        var state = await StateProvider.GetAuthenticationStateAsync();
+        foreach (var x in state.User.Claims)
+        {
+            Console.WriteLine($"{x.Type} {x.Value}");
+        }
+        
         var projects = await ProjectService.GetProjectsAsync();
         
         foreach (var project in projects)

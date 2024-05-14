@@ -23,9 +23,6 @@
       <Content Update="wwwroot\appsettings.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
-      <Content Update="wwwroot\appsettings.Developer.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
     </ItemGroup>
 
 </Project>
