@@ -58,21 +58,22 @@ public class ProjectsController : ControllerBase
     }
 
     // nowy projekt
-    [HttpPost]
-    public async Task<ActionResult<Project>> CreateProject(string projectName, string description, DateTime deadline)
+   [HttpPost]
+    public async Task<ActionResult<Project>> CreateProject([FromQuery] ProjectDto projectDto)
     {
         var project = new Project
         {
-            ProjectName = projectName,
-            Description = description,
-            DeadlineDateTime = deadline,
-            CreationDateTime = DateTime.UtcNow
+            ProjectName = projectDto.ProjectName,
+            Description = projectDto.Description,
+            DeadlineDateTime = projectDto.DeadlineDateTime,
+            CreationDateTime = DateTime.UtcNow 
         };
         _context.Projects.Add(project);
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetProject), new { id = project.Id }, project);
     }
+
 
     // modyfikacja projektu
     [HttpPut("{id}")]
