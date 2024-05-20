@@ -1,9 +1,6 @@
 @page "/authentication/{action}"
 @using System.Security.Claims
 @inject AuthenticationStateProvider AuthProvider
-@inject HttpClient HttpCLient
-@inject UserService UserService
-@inject NavigationManager Navigation
 <RemoteAuthenticatorView Action="@Action" OnLogInSucceeded="@OnLoginSuccess"/>
 
 
@@ -16,9 +13,12 @@
         var authState = await AuthProvider.GetAuthenticationStateAsync();
         var newClaim = new Claim("CUSTOM_CLAIM", "VALUE_FOR_CUSTOM_CLAIM");
         ((ClaimsIdentity)authState.User.Identity!).AddClaim(newClaim);
-        
+
+
+
         // insert claims or something
         //await UserService.LoginGoogle();
     }
+
 
 }

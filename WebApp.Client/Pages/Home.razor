@@ -1,7 +1,9 @@
 ﻿@page "/"
+@using Newtonsoft.Json
 @inject HttpClient HttpClient
 @inject ProjectService ProjectService
 @inject AuthenticationStateProvider StateProvider
+@inject IJSRuntime JS
 
 <PageTitle>Home</PageTitle>
 
@@ -65,22 +67,53 @@ img {
     
     string data = "";
     string accessToken = "";
-
+    [CascadingParameter]
+    private Task<AuthenticationState> authStateTask {get; set;}
     protected override async Task OnInitializedAsync()
     {
 
-        var state = await StateProvider.GetAuthenticationStateAsync();
+        var state = await authStateTask;
         foreach (var x in state.User.Claims)
         {
             Console.WriteLine($"{x.Type} {x.Value}");
         }
-        
-        var projects = await ProjectService.GetProjectsAsync();
-        
-        foreach (var project in projects)
+
+        if (state.User.Claims.Any())
         {
-            data += project.ProjectName + " | ";
+            string key = "Microsoft.AspNetCore.Components.WebAssembly.Authentication.CachedAuthSettings";
+            string authSettingsRAW = await JS.InvokeAsync<string>("sessionStorage.getItem", key);
+            var authSettings = JsonConvert.DeserializeObject<CachedAuthSettings>(authSettingsRAW);
+            string userRAW = await JS.InvokeAsync<string>("sessionStorage.getItem", authSettings?.OIDCUserKey);
+            var user = JsonConvert.DeserializeObject<OIDCUser>(userRAW);
+            Console.WriteLine(user.id_token);
         }
+        
+
+    }
+    
+    public class CachedAuthSettings
+    {
+        public string authority { get; set; }
+        public string metadataUrl { get; set; }
+        public string client_id { get; set; }
+        public string[] defaultScopes { get; set; }
+        public string redirect_uri { get; set; }
+        public string post_logout_redirect_uri { get; set; }
+        public string response_type { get; set; }
+        public string response_mode { get; set; }
+        public string scope { get; set; }
+
+        public string OIDCUserKey => $"oidc.user:{authority}:{client_id}";
+    }
+
+    public class OIDCUser
+    {
+        public string id_token { get; set; }
+        public string access_token { get; set; }
+        public string refresh_token { get; set; }
+        public string token_type { get; set; }
+        public string scope { get; set; }
+        public int expires_at { get; set; }
     }
 
 }
