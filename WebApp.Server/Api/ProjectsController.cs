@@ -59,7 +59,7 @@ public class ProjectsController : ControllerBase
 
     // nowy projekt
    [HttpPost]
-    public async Task<ActionResult<Project>> CreateProject([FromQuery] ProjectDto projectDto)
+    public async Task<ActionResult<Project>> CreateProject([FromBody] ProjectDto projectDto)
     {
         var project = new Project
         {
@@ -73,7 +73,6 @@ public class ProjectsController : ControllerBase
 
         return CreatedAtAction(nameof(GetProject), new { id = project.Id }, project);
     }
-
 
     // modyfikacja projektu
     [HttpPut("{id}")]
