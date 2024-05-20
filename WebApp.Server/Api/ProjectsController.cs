@@ -59,7 +59,7 @@ public class ProjectsController : ControllerBase
 
     // nowy projekt
     [HttpPost]
-    public async Task<ActionResult<Project>> CreateProject(string projectName, string description, DateTime deadline)
+    public async Task<ActionResult<Project>> CreateProject(string projectName, string description, DateTime? deadline)
     {
         var project = new Project
         {

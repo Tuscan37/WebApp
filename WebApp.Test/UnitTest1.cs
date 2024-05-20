@@ -19,7 +19,7 @@ public class UnitTest1 : IDisposable
 
     public void Dispose()
     {
-        _context.Database.EnsureDeleted();
+        //_context.Database.EnsureDeleted();
         _context.Dispose();
     }
     [Fact]
