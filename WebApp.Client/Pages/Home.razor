@@ -18,9 +18,10 @@ img {
   margin-right: auto;
 }
 </style>
-@if (logged)
-{
-    
+
+<AuthorizeView>
+    <Authorized>
+        
     <style>
         body { background: white !important; }
     </style>
@@ -41,18 +42,21 @@ img {
     </div>
     
     
-    
-}
-else
-{
-    <style>
-        body { background: red !important; }
-    </style>
-    <div class="center">
-        <img src="/Res/sotp.png" id="sotp" width="90%" height="90%">
-    </div>
-}
+
+
+
 @data
+    </Authorized>
+    <NotAuthorized>
+            <style>
+                body { background: red !important; }
+            </style>
+        <div class="center">
+            <img src="/Res/sotp.png" id="sotp" width="90%" height="90%">
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
 
 @code{
     
