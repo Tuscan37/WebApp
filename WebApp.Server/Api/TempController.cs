@@ -1,7 +1,9 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Net;
+using System.Security.Claims;
 using WebApp.Server.Data;
 using WebApp.Server.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 namespace WebApp.Server.Api;
 [ApiController]
@@ -10,6 +12,7 @@ public class TempController : ControllerBase
 {
     private readonly TokenService _tokenService;
     private readonly ApplicationDbContext _context;
+    
     public TempController([FromServices] TokenService tokenService,[FromServices] ApplicationDbContext context)
     {
         _tokenService = tokenService;
@@ -20,7 +23,9 @@ public class TempController : ControllerBase
     [HttpGet("temp1")]
     public ActionResult<String> Temp1()
     {
-        return "You are a regular user!";
+        var email = User.Claims.Single(c => c.Type == ClaimTypes.Email)
+            .Value;
+        return $"{email} Very cool!";
     }
         
     [Authorize(Roles = "Admin")]
@@ -33,7 +38,7 @@ public class TempController : ControllerBase
     [HttpPost("tempLogin")]
     public ActionResult<String> TempLogin()
     {
-        string token = _tokenService.GenerateToken(new User
+        string token = _tokenService.GenerateAccessToken(new User
         {
             Id = 420,
         });
@@ -43,21 +48,13 @@ public class TempController : ControllerBase
     [HttpPost("tempLoginAdmin")]
     public ActionResult<String> TempLoginAdmin()
     {
-        string token = _tokenService.GenerateToken(new User
+        string token = _tokenService.GenerateAccessToken(new User
         {
             Id = 420,
         },"Admin");
         return token;
     }
-
-    [HttpGet("tempReadClaims")]
-    [Authorize]
-    public ActionResult<string> ReadClaims()
-    {
-        string id = _tokenService.GetId()!;
-        string role = _tokenService.GetRole()!;
-        return Ok(new { id, role });
-    }
+    
 
     [HttpPost("CreateProjects")]
     public ActionResult CreateProjects()

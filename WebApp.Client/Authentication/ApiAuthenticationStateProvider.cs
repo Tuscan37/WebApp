@@ -1,10 +1,10 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Newtonsoft.Json;
-using WebApp.Shared.Generics;
 
 namespace WebApp.Client.Authentication;
 
@@ -14,16 +14,22 @@ public class ApiAuthenticationStateProvider(ILocalStorageService localStorageSer
     
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var savedToken = await localStorageService.GetItemAsync<string>("authToken");
+        var savedToken = await localStorageService.GetItemAsync<string>("accessToken");
         if (string.IsNullOrWhiteSpace(savedToken))
         {
             return new AuthenticationState(_anonymous);
         }
+        
+        var jwt = new JwtSecurityToken(savedToken);
 
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", savedToken);
         return new AuthenticationState(
-            new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(savedToken)))
+            new ClaimsPrincipal(new ClaimsIdentity(jwt.Claims))
         );
+        
+        //return new AuthenticationState(
+        //    new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(savedToken)))
+        //);
     }
     
 
@@ -57,7 +63,7 @@ public class ApiAuthenticationStateProvider(ILocalStorageService localStorageSer
     }
     public void MarkUserAsAuthenticated(string email)
     {
-        var authenticatedUser = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, email) }, "apiauth"));
+        var authenticatedUser = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Email, email) }, "apiauth"));
         var authState = Task.FromResult(new AuthenticationState(authenticatedUser));
         NotifyAuthenticationStateChanged(authState);
     }
@@ -65,21 +71,5 @@ public class ApiAuthenticationStateProvider(ILocalStorageService localStorageSer
     {
         var authState = Task.FromResult(new AuthenticationState(_anonymous));
         NotifyAuthenticationStateChanged(authState);
-    }
-    public async Task UpdateAuthenticationState(string? token)
-    {
-        ClaimsPrincipal claimsPrincipal;
-        if (!string.IsNullOrWhiteSpace(token))
-        {
-            var userClaims = Generics.GetClaimsFromToken(token);
-            claimsPrincipal = Generics.SetClaimPrincipal(userClaims);
-            await localStorageService.SetItemAsStringAsync("token", token);
-        }
-        else
-        {
-            claimsPrincipal = _anonymous;
-            await localStorageService.RemoveItemAsync("token");
-        }
-        NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsPrincipal)));
     }
 }

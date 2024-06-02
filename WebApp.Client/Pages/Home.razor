@@ -1,10 +1,11 @@
 ﻿@page "/"
-@using WebApp.Shared.Dto
-@using Newtonsoft.Json
 @using WebApp.Client.Components
 @using WebApp.Client.Services
+@using System.Security.Claims
 @inject HttpClient HttpClient
 @inject ProjectService ProjectService
+@inject UserService UserService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Home</PageTitle>
 
@@ -42,7 +43,7 @@ img {
     </div>
     
     
-
+@userName <br/>
 
 
 @data
@@ -60,8 +61,8 @@ img {
 
 @code{
     
-    public static bool logged = true;
     public static bool admin = true;
+    public string userName = "";
 
     @code {
         private ModalDialog ModalDialog { get; set; }
@@ -71,12 +72,21 @@ img {
 
     protected override async Task OnInitializedAsync()
     {
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var thing = state.User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+        if (!string.IsNullOrEmpty(thing))
+        {
+            data = thing;
+        }
         var projects = await ProjectService.GetProjectsAsync();
         
         foreach (var project in projects)
         {
             data += project.ProjectName + " | ";
         }
+
+        var authTest = await UserService.AuthTest();
+        Console.WriteLine(authTest);
     }
 
 }

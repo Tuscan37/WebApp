@@ -17,7 +17,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<UserService>();
 builder.Services.AddSingleton<TokenService>();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -97,6 +96,8 @@ app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
 
-
-
 app.Run();
+
+public partial class Program
+{
+}
