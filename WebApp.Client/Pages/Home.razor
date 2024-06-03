@@ -1,10 +1,11 @@
 ﻿@page "/"
-@using WebApp.Shared.Dto
-@using Newtonsoft.Json
 @using WebApp.Client.Components
 @using WebApp.Client.Services
+@using System.Security.Claims
 @inject HttpClient HttpClient
 @inject ProjectService ProjectService
+@inject UserService UserService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Home</PageTitle>
 
@@ -21,7 +22,14 @@ img {
 
 <AuthorizeView>
     <Authorized>
-        
+        @if (state != null && state.User.IsInRole("admin"))
+        {
+            <p>ADMIN</p>
+        }
+        else
+        {
+            <p>NOT ADMIN</p>
+        }
     <style>
         body { background: white !important; }
     </style>
@@ -42,7 +50,7 @@ img {
     </div>
     
     
-
+@userName <br/>
 
 
 @data
@@ -60,23 +68,34 @@ img {
 
 @code{
     
-    public static bool logged = true;
     public static bool admin = true;
+    public string userName = "";
 
     @code {
         private ModalDialog ModalDialog { get; set; }
     }
     
     public string data = "";
-
+    AuthenticationState? state = null;
     protected override async Task OnInitializedAsync()
     {
+        state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (!state.User.Claims.Any())
+        {
+            return;
+        }
+
         var projects = await ProjectService.GetProjectsAsync();
         
         foreach (var project in projects)
         {
             data += project.ProjectName + " | ";
         }
+
+        Console.WriteLine(state.User.IsInRole("admin"));
+        Console.WriteLine(state.User.IsInRole("nonexistentrole"));
+
+        //await UserService.AuthTest();
     }
 
 }
