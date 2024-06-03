@@ -22,7 +22,14 @@ img {
 
 <AuthorizeView>
     <Authorized>
-        
+        @if (state != null && state.User.IsInRole("admin"))
+        {
+            <p>ADMIN</p>
+        }
+        else
+        {
+            <p>NOT ADMIN</p>
+        }
     <style>
         body { background: white !important; }
     </style>
@@ -69,19 +76,15 @@ img {
     }
     
     public string data = "";
-
+    AuthenticationState? state = null;
     protected override async Task OnInitializedAsync()
     {
-        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         if (!state.User.Claims.Any())
         {
             return;
         }
-        var thing = state.User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
-        if (!string.IsNullOrEmpty(thing))
-        {
-            data = thing;
-        }
+
         var projects = await ProjectService.GetProjectsAsync();
         
         foreach (var project in projects)
@@ -89,8 +92,10 @@ img {
             data += project.ProjectName + " | ";
         }
 
-        var authTest = await UserService.AuthTest();
-        Console.WriteLine(authTest);
+        Console.WriteLine(state.User.IsInRole("admin"));
+        Console.WriteLine(state.User.IsInRole("nonexistentrole"));
+
+        //await UserService.AuthTest();
     }
 
 }

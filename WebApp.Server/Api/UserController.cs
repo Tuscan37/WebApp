@@ -67,6 +67,22 @@ public class UserController : ControllerBase
         });
     }
 
+    [HttpPost("logout")]
+    public async Task<ActionResult<string>> Logout(AuthToken authToken)
+    {
+        string accessToken = authToken.AccessToken;
+        string refreshToken = authToken.RefreshToken;
+        //var hashedAccessToken = Hasher.sha256_hash(accessToken);
+        var hashedRefreshToken = Hasher.sha256_hash(refreshToken);
+        var login = await _context.Logins.SingleOrDefaultAsync(l => l.HashedRefreshToken == hashedRefreshToken);
+        if (login is null)
+        {
+            return BadRequest("Invalid login");
+        }
+        _context.Logins.Remove(login);
+        return Ok("Logged out");
+    }
+
     [HttpPost("refresh")]
     public async Task<ActionResult<LoginResult>> Refresh(AuthToken authToken)
     {

@@ -1,7 +1,9 @@
 @page "/Logout"
 @using WebApp.Client.Services
+@using Blazored.LocalStorage
 @inject NavigationManager NavigationManager
 @inject UserService UserService
+
 <h3>Logout</h3>
 @code {
     protected override async Task OnInitializedAsync()

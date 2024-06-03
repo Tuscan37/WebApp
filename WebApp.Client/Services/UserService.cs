@@ -30,8 +30,7 @@ public class UserService(HttpClient httpClient, ApiAuthenticationStateProvider a
 
         await localStorageService.SetItemAsStringAsync("accessToken", loginResult!.AuthToken!.AccessToken);
         await localStorageService.SetItemAsStringAsync("refreshToken", loginResult!.AuthToken!.RefreshToken);
-        authenticationStateProvider.MarkUserAsAuthenticated(loginDto.Email);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", loginResult.AuthToken.AccessToken);
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
         return loginResult;
     }
 
@@ -52,17 +51,27 @@ public class UserService(HttpClient httpClient, ApiAuthenticationStateProvider a
 
         await localStorageService.SetItemAsStringAsync("accessToken", loginResult!.AuthToken!.AccessToken);
         await localStorageService.SetItemAsStringAsync("refreshToken", loginResult!.AuthToken!.RefreshToken);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", loginResult.AuthToken.AccessToken);
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
         return loginResult;
     }
 
     public async Task Logout()
     {
+        var accessToken = await localStorageService.GetItemAsync<string>("accessToken");
+        var refreshToken = await localStorageService.GetItemAsync<string>("refreshToken");
+        if (accessToken is null || refreshToken is null)
+        {
+            return;
+        }
+        var json = Helpers.GetStringContentFromObject(new AuthToken
+        {
+            AccessToken = accessToken!,
+            RefreshToken = refreshToken!
+        });
         await localStorageService.RemoveItemAsync("accessToken");
         await localStorageService.RemoveItemAsync("refreshToken");
-        httpClient.DefaultRequestHeaders.Authorization = null;
-        authenticationStateProvider.MarkUserAsLoggedOut();
-        httpClient.DefaultRequestHeaders.Authorization = null;
+        var response = await httpClient.PostAsync("/api/user/logout",json);
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
     }
     
     public async Task<string> AuthTest()

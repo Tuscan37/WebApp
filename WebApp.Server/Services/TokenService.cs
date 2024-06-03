@@ -23,7 +23,8 @@ public class TokenService(IConfiguration config)
         var claims = new List<Claim>
         {
             new(ClaimTypes.Email,user.Email),
-            new(ClaimTypes.Name,user.Username)
+            new(ClaimTypes.Name,user.Username),
+            new(ClaimTypes.Role, user.Role)
         };
 
         JwtSecurityToken token = new JwtSecurityToken(issuer,

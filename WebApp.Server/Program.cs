@@ -18,6 +18,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<TokenService>();
+builder.Services.AddHostedService<DatabaseCleanupService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>

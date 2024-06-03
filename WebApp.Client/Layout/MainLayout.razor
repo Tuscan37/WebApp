@@ -9,28 +9,21 @@
 
     <main>
         <div class="top-row px-4">
-            <NavLink href="login">Login</NavLink>
-            <NavLink href="register">Register</NavLink>
-            <NavLink href="logout">Logout</NavLink>
+            <AuthorizeView>
+                <Authorized>
+                    <NavLink href="logout">Logout</NavLink>
+                </Authorized>
+                <NotAuthorized>
+                    <NavLink href="login">Login</NavLink>
+                    <NavLink href="register">Register</NavLink>
+                </NotAuthorized>
+            </AuthorizeView>
+            
+
+
         </div>
         <article class="content px-4">
             @Body
         </article>
     </main>
 </div>
-@code
-{
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var claimEmail = state.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
-            if (claimEmail != null)
-            {
-                AuthenticationStateProvider.MarkUserAsAuthenticated(claimEmail.Value);
-            }
-        }
-
-    }
-}
