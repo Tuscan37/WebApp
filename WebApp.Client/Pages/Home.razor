@@ -73,6 +73,10 @@ img {
     protected override async Task OnInitializedAsync()
     {
         var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (!state.User.Claims.Any())
+        {
+            return;
+        }
         var thing = state.User.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
         if (!string.IsNullOrEmpty(thing))
         {
