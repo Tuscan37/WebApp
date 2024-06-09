@@ -1,11 +1,7 @@
 ﻿@page "/"
 @using WebApp.Client.Components
 @using WebApp.Client.Services
-@using System.Security.Claims
-@inject HttpClient HttpClient
 @inject ProjectService ProjectService
-@inject UserService UserService
-@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Home</PageTitle>
 
@@ -22,7 +18,7 @@ img {
 
 <AuthorizeView>
     <Authorized>
-        @if (state != null && state.User.IsInRole("admin"))
+        @if (isAdmin)
         {
             <p>ADMIN</p>
         }
@@ -76,14 +72,20 @@ img {
     }
     
     public string data = "";
-    AuthenticationState? state = null;
+    
+    [CascadingParameter]
+    public Task<AuthenticationState> stateTask { get; set; }
+
+    bool isAdmin = false;
     protected override async Task OnInitializedAsync()
     {
-        state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var state = await stateTask;
         if (!state.User.Claims.Any())
         {
             return;
         }
+
+        isAdmin = state.User.IsInRole("admin");
 
         var projects = await ProjectService.GetProjectsAsync();
         
@@ -91,9 +93,6 @@ img {
         {
             data += project.ProjectName + " | ";
         }
-
-        Console.WriteLine(state.User.IsInRole("admin"));
-        Console.WriteLine(state.User.IsInRole("nonexistentrole"));
 
         //await UserService.AuthTest();
     }

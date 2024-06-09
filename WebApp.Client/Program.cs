@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using WebApp.Client;
-using WebApp.Client.Authentication;
 using WebApp.Client.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);

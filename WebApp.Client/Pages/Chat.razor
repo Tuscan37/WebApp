@@ -1,0 +1,77 @@
+@page "/Chat"
+@using Microsoft.AspNetCore.SignalR.Client
+@using Blazored.LocalStorage
+@implements IAsyncDisposable
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
+<PageTitle>Chat</PageTitle>
+<h1>Hello World!</h1>
+<InputText @bind-Value="MessageToSend"></InputText>
+<button @onclick="SendMessage">Send Message</button>
+<br/>
+Messages:
+<ul>
+    @foreach (var message in _messages)
+    {
+        <li>@message</li>
+    }
+</ul>
+
+@code{
+    public string MessageToSend = "";
+
+    private HubConnection? _hubConnection;
+    private readonly List<string> _messages = new();
+    protected override async Task OnInitializedAsync()
+    {
+            var uri =NavigationManager.BaseUri;
+            var accessToken = await LocalStorage.GetItemAsync<string>("accessToken");
+            if (string.IsNullOrWhiteSpace(accessToken))
+            {
+                NavigationManager.NavigateTo("login");
+            }
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(uri+"api/chat", o => o.AccessTokenProvider = () => Task.FromResult<string?>(accessToken))
+            .Build();
+        _hubConnection.On<string>("ReceiveInitialMessage", message =>
+        {
+            _messages.Add(message);
+            InvokeAsync(StateHasChanged);
+        });
+        _hubConnection.On<string,string>("ReceiveMessage", (message,senderName) =>
+        {
+            string start;
+            if (string.IsNullOrWhiteSpace(senderName))
+            {
+                start = "Anonymous user sends: ";
+            }
+            else
+            {
+                start = $"{senderName} sends: ";
+            }
+            _messages.Add(start+message);
+            InvokeAsync(StateHasChanged);
+        });
+        await _hubConnection.StartAsync();
+    }
+
+    async Task SendMessage()
+    {
+        var uri =NavigationManager.BaseUri;
+        if (string.IsNullOrWhiteSpace(MessageToSend))
+        {
+            return;
+        }
+        await _hubConnection!.SendAsync("SendMessage", MessageToSend);
+        
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.DisposeAsync();
+        }
+    }
+
+}
