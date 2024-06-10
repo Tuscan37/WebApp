@@ -3,6 +3,7 @@
 @using Newtonsoft.Json
 @using WebApp.Client.Components
 @using WebApp.Client.Services
+@using System.Diagnostics
 @inject HttpClient HttpClient
 @inject ProjectService ProjectService
 
@@ -51,7 +52,7 @@ table, th, td {
                             <ValidationMessage For="@(() => proj.Description)" />
                         </div>
                         <div >
-                            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value:format="dd/MM/yyyy hh:mm:ss" @bind-Value="proj.DeadlineDateTime" class="form-control" />
+                            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="proj.DeadlineDateTime" class="form-control" />
                             <ValidationMessage For="@(() => proj.DeadlineDateTime)" />
                         </div>                            
                         <br />
@@ -77,7 +78,7 @@ table, th, td {
                             <ValidationMessage For="@(() => proj.Description)" />
                         </div>
                         <div >
-                            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value:format="dd/MM/yyyy hh:mm:ss" @bind-Value="proj.DeadlineDateTime" class="form-control" />
+                            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="proj.DeadlineDateTime" class="form-control" />
                             <ValidationMessage For="@(() => proj.DeadlineDateTime)" />
                         </div>                            
                         <br />
@@ -148,6 +149,7 @@ else
         {
             await ProjectService.AddProject(proj);
             ModalDialog.Close();
+            Console.WriteLine(proj.DeadlineDateTime);
         }
         if (proj.ProjectName == "")
         {

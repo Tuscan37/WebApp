@@ -65,7 +65,7 @@ public class ProjectsController : ControllerBase
         {
             ProjectName = proj.ProjectName,
             Description = proj.Description,
-            DeadlineDateTime = proj.DeadlineDateTime,
+            DeadlineDateTime = DateTime.Parse(proj.DeadlineDateTime.ToString()).ToUniversalTime().AddHours(1),
             CreationDateTime = DateTime.UtcNow
         };
         _context.Projects.Add(project);
