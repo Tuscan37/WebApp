@@ -28,4 +28,5 @@ public class ProjectService(HttpClient httpClient)
         var response = await httpClient.GetAsync($"{BaseUrl}/search?term={searchTerm}");
         return JsonConvert.DeserializeObject<List<ProjectDto>>(await response.Content.ReadAsStringAsync())!;
     }
+
 }
