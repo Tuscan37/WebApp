@@ -1,36 +1,28 @@
-﻿@using WebApp.Client.Authentication
-@inherits LayoutComponentBase
-@inject ApiAuthenticationStateProvider AuthenticationStateProvider
+﻿@inherits LayoutComponentBase
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
 
     <main>
         <div class="top-row px-4">
-            <a href="login" target="_blank">Login</a>
-            <a href="register" target="_blank">Register</a>
-            <a href="logout" target="_blank">Logout</a>
+            <AuthorizeView>
+                <Authorized>
+                    <NavLink href="logout">Logout</NavLink>
+                </Authorized>
+                <NotAuthorized>
+                    <NavLink href="login">Login</NavLink>
+                    <NavLink href="register">Register</NavLink>
+                </NotAuthorized>
+            </AuthorizeView>
+            
+
+
         </div>
         <article class="content px-4">
             @Body
         </article>
     </main>
 </div>
-@code
-{
-    
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var claimEmail = state.User.Claims.FirstOrDefault(c => c.Type == "email");
-            if (claimEmail != null)
-            {
-                AuthenticationStateProvider.MarkUserAsAuthenticated(claimEmail.Value);
-            }
-        }
+@code{
 
-    }
+    
+
 }

@@ -1,8 +1,10 @@
+using System.Net.WebSockets;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using WebApp.Server;
 using WebApp.Server.Data;
 using WebApp.Server.Services;
 
@@ -17,8 +19,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<UserService>();
 builder.Services.AddSingleton<TokenService>();
+builder.Services.AddHostedService<DatabaseCleanupService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
@@ -66,9 +68,14 @@ builder.Services.AddAuthentication(x =>
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
-        ValidateIssuerSigningKey = true
+        ValidateIssuerSigningKey = true,
+        ClockSkew = TimeSpan.Zero
     };
 });
+
+builder.Services.AddSignalR();
+//builder.Services.AddHostedService<ServerTimeNotifier>();
+builder.Services.AddCors();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -85,6 +92,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapHub<ChatHub>("/api/chat");
+app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
@@ -97,6 +106,8 @@ app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
 
-
-
 app.Run();
+
+public partial class Program
+{
+}
