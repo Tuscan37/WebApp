@@ -14,11 +14,9 @@ public class DatabaseCleanupService(ILogger<DatabaseCleanupService> logger, ISer
 
     private async void CleanDb(object? state)
     {
-        using (var scope = scopeFactory.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetService<ApplicationDbContext>();
-            await context!.Logins.Where(l => l.ExpiresAt <= DateTime.UtcNow).ExecuteDeleteAsync();
-        }
+        using var scope = scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetService<ApplicationDbContext>();
+        await context!.Logins.Where(l => l.ExpiresAt <= DateTime.UtcNow).ExecuteDeleteAsync();
         
     }
 

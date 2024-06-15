@@ -1,13 +1,10 @@
 ﻿@page "/"
 @using WebApp.Client.Components
 @using WebApp.Client.Services
-@using System.Security.Claims
 @using System.Text
 @using Newtonsoft.Json
 @using WebApp.Shared.Dto
-@inject HttpClient HttpClient
 @inject ProjectService ProjectService
-@inject UserService UserService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Home</PageTitle>

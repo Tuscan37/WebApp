@@ -1,0 +1,42 @@
+@page "/OneTaskTest"
+<h3>Playground</h3>
+
+<button @onclick="MyFunc">Button1</button>
+<button @onclick="MyFunc">Button2</button>
+<button @onclick="MyFunc">Button3</button>
+
+@code {
+
+    TempClass _tempClass = new TempClass();
+    public async Task MyFunc()
+    {
+        await _tempClass.TaskInterface();
+    }
+
+    public class TempClass
+    {
+        private Task? _task = null;
+
+        public Task TaskInterface()
+        {
+            if (_task == null)
+            {
+                Console.WriteLine("Creating new task");
+                _task = JobToDo();
+            }
+            else
+            {
+                Console.WriteLine("Task is already running");
+            }
+            return _task;
+        }
+
+        private async Task JobToDo()
+        {
+            await Task.Delay(5000);
+            Console.WriteLine("Very cool");
+            _task = null;
+        }
+        
+    }
+}

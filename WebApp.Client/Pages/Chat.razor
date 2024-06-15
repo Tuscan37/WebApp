@@ -1,0 +1,84 @@
+@page "/Chat"
+@using Microsoft.AspNetCore.SignalR.Client
+@using Blazored.LocalStorage
+@implements IAsyncDisposable
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
+<PageTitle>Chat</PageTitle>
+<h1>Hello World!</h1>
+<InputText @bind-Value="RoomTemp"></InputText>
+<button @onclick="SwitchRoom">Switch Room</button>
+<br/>
+<InputText @bind-Value="MessageToSend"></InputText>
+<button @onclick="SendMessage">Send Message</button>
+<br/>
+Messages:
+<ul>
+    @foreach (var message in _messages)
+    {
+        <li>@message</li>
+    }
+</ul>
+
+@code{
+    public string MessageToSend = "";
+    public string RoomTemp = "";
+    public string Room = "";
+
+    private HubConnection? _hubConnection;
+    private readonly List<string> _messages = new();
+    protected override async Task OnInitializedAsync()
+    {
+            var uri =NavigationManager.BaseUri;
+            var accessToken = await LocalStorage.GetItemAsync<string>("accessToken");
+            if (string.IsNullOrWhiteSpace(accessToken))
+            {
+                NavigationManager.NavigateTo("login");
+            }
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(uri+"api/chat", o => o.AccessTokenProvider = () => Task.FromResult<string?>(accessToken))
+            .Build();
+        _hubConnection.On<string>("ReceiveInitialMessage", message =>
+        {
+            _messages.Add(message);
+            InvokeAsync(StateHasChanged);
+        });
+        _hubConnection.On<string,string,string>("ReceiveMessage", (message,senderName,room) =>
+        {
+            _messages.Add($"Room Id: {room} | Sent by: {senderName} | {message}");
+            InvokeAsync(StateHasChanged);
+        });
+        _hubConnection.On<string>("UserConnectedToRoom", (userName) =>
+        {
+            _messages.Add($"User {userName} connected to room!");
+            InvokeAsync(StateHasChanged);
+        });
+        await _hubConnection.StartAsync();
+    }
+
+    async Task SendMessage()
+    {
+        var uri =NavigationManager.BaseUri;
+        if (string.IsNullOrWhiteSpace(MessageToSend))
+        {
+            return;
+        }
+        await _hubConnection!.SendAsync("SendMessage", MessageToSend,Room);
+        
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.DisposeAsync();
+        }
+    }
+
+    public async Task SwitchRoom()
+    {
+        await _hubConnection!.SendAsync("LeaveRoom", Room);
+        Room = RoomTemp;
+        await _hubConnection!.SendAsync("JoinRoom", Room);
+    }
+}
