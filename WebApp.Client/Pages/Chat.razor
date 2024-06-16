@@ -1,40 +1,52 @@
 @page "/Chat"
 @using Microsoft.AspNetCore.SignalR.Client
 @using Blazored.LocalStorage
+@using WebApp.Client.Components
 @implements IAsyncDisposable
 @inject NavigationManager NavigationManager
 @inject ILocalStorageService LocalStorage
 <PageTitle>Chat</PageTitle>
-<h1>Hello World!</h1>
-<InputText @bind-Value="RoomTemp"></InputText>
-<button @onclick="SwitchRoom">Switch Room</button>
-<br/>
-<InputText @bind-Value="MessageToSend"></InputText>
-<button @onclick="SendMessage">Send Message</button>
-<br/>
-Messages:
-<ul>
-    @foreach (var message in _messages)
-    {
-        <li>@message</li>
-    }
-</ul>
+<ChatSidebar @ref=ChatSidebar></ChatSidebar>
+<div class="main">
+    <InputText @bind-Value="NewRoomName"></InputText>
+    <button @onclick="() => CreateRoom(NewRoomName)">Create Room</button>
+    <br/>
+    <InputText @bind-Value="MessageToSend"></InputText>
+    <button @onclick="SendMessage">Send Message</button>
+    <br/>
+    Messages:
+    <ul>
+        @foreach (var message in _messages)
+        {
+            <li>@message</li>
+        }
+    </ul>
+</div>
 
 @code{
+
+
+    public class Room(string roomId,string name)
+    {
+        public string RoomId { get; } = roomId;
+        public string Name { get; } = name;
+    }
+    
     public string MessageToSend = "";
-    public string RoomTemp = "";
-    public string Room = "";
+    public string NewRoomName = "";
+    public string RoomId = "";
+    ChatSidebar ChatSidebar;
 
     private HubConnection? _hubConnection;
     private readonly List<string> _messages = new();
     protected override async Task OnInitializedAsync()
     {
-            var uri =NavigationManager.BaseUri;
-            var accessToken = await LocalStorage.GetItemAsync<string>("accessToken");
-            if (string.IsNullOrWhiteSpace(accessToken))
-            {
-                NavigationManager.NavigateTo("login");
-            }
+        var uri =NavigationManager.BaseUri;
+        var accessToken = await LocalStorage.GetItemAsync<string>("accessToken");
+        if (string.IsNullOrWhiteSpace(accessToken))
+        {
+            NavigationManager.NavigateTo("login");
+        }
         _hubConnection = new HubConnectionBuilder()
             .WithUrl(uri+"api/chat", o => o.AccessTokenProvider = () => Task.FromResult<string?>(accessToken))
             .Build();
@@ -53,6 +65,15 @@ Messages:
             _messages.Add($"User {userName} connected to room!");
             InvokeAsync(StateHasChanged);
         });
+        _hubConnection.On<string>("ReceiveNotification", (notification) =>
+        {
+            _messages.Add($"Notification: {notification}");
+        });
+        _hubConnection.On<string, string>("ReceiveNewRoomCreated", (roomId, name) =>
+        {
+            var room = new Room(roomId, name);
+            ChatSidebar.AddRoom(room);
+        });
         await _hubConnection.StartAsync();
     }
 
@@ -63,7 +84,7 @@ Messages:
         {
             return;
         }
-        await _hubConnection!.SendAsync("SendMessage", MessageToSend,Room);
+        await _hubConnection!.SendAsync("SendMessage", MessageToSend,RoomId);
         
     }
 
@@ -75,10 +96,25 @@ Messages:
         }
     }
 
+    public async Task CreateRoom(string name)
+    {
+        await _hubConnection!.SendAsync("CreateRoom",name);
+    }
+
+    public async Task JoinRoom(string roomId)
+    {
+        
+    }
+
+    public async Task LeaveRoom()
+    {
+        
+    }
+
     public async Task SwitchRoom()
     {
-        await _hubConnection!.SendAsync("LeaveRoom", Room);
-        Room = RoomTemp;
-        await _hubConnection!.SendAsync("JoinRoom", Room);
+        await _hubConnection!.SendAsync("LeaveRoom", RoomId);
+        RoomId = NewRoomName;
+        await _hubConnection!.SendAsync("JoinRoom", RoomId);
     }
 }

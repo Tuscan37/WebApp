@@ -1,0 +1,57 @@
+@using WebApp.Client.Pages
+<div class="sidebar">
+    <div>
+        <button @onclick="ToggleRooms">Room list</button>
+        <br/>
+        <div class="@(RoomListHidden ? "hidden" : string.Empty)">
+                <ul>
+                    @foreach (var room in _rooms)
+                    {
+                        <li @onclick="() => ClickOnRoom(room.Value)">@room.Value.Name</li>
+                    }
+                </ul>
+        </div>
+    </div>
+
+    <div>
+        <button @onclick="ToggleRoomInfo">Room information</button>
+        <br/>
+        <div class="@(CurrentChatInfoHidden ? "hidden" : string.Empty)">
+            current room stuff
+        </div>
+    </div>
+
+</div>
+@code {
+    public bool RoomListHidden = false;
+    public bool CurrentChatInfoHidden = true;
+
+    Dictionary<string, Chat.Room> _rooms = new Dictionary<string, Chat.Room>();
+    //List<Chat.Chat.Room> _rooms = new();
+    public Chat.Room? SelectedRoom = null;
+    public void AddRoom(Chat.Room room)
+    {
+        _rooms.TryAdd(room.RoomId,room);
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void RemoveRoom(string roomId)
+    {
+        
+    }
+
+    private void ClickOnRoom(Chat.Room room)
+    {
+        SelectedRoom = room;
+    }
+    
+    private void ToggleRooms()
+    {
+        RoomListHidden = !RoomListHidden;
+    }
+
+    private void ToggleRoomInfo()
+    {
+        CurrentChatInfoHidden = !CurrentChatInfoHidden;
+    }
+}`
