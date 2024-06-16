@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/Assignments"
 @using WebApp.Client.Components
 @using WebApp.Client.Services
 @using System.Security.Claims
@@ -6,11 +6,12 @@
 @using Newtonsoft.Json
 @using WebApp.Shared.Dto
 @inject HttpClient HttpClient
-@inject ProjectService ProjectService
+@inject AssignmentService AssignmentService
 @inject UserService UserService
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavManager
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Zadania</PageTitle>
 
 <style>
 .center {
@@ -32,28 +33,28 @@ table, th, td {
             body { background: white !important; }
         </style>
         <div style="text-align: center;">
-            <h1>Projekty</h1>
+            <h1>Zadania Projektu</h1>
             @if (state != null && state.User.IsInRole("admin"))
                         {
                             <button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg text-uppercase w-30" @onclick="() => AddDialog.Open()">Kliknij, aby dodać nowy projekt</button>
                             
-                            <ModalDialog @ref="AddDialog" Title="Dodawanie Projektu">
+                            <ModalDialog @ref="AddDialog" Title="Dodawanie Zadania">
                                 <div class="row">
-                                    <EditForm  Model="@proj" EditContext="@editContext" >
+                                    <EditForm  Model="@asgn" EditContext="@editContext" >
                                         <DataAnnotationsValidator />
                                         
                                         <div class="form-group">
-                                            <InputText @bind-Value="proj.ProjectName" class="form-control" placeholder="Nazwa Projektu" />
-                                            <ValidationMessage For="@(() => proj.ProjectName)" />
+                                            <InputText @bind-Value="asgn.Name" class="form-control" placeholder="Nazwa Zadania" />
+                                            <ValidationMessage For="@(() => asgn.Name)" />
                                         </div>
                                         
                                         <div class="form-group">
-                                            <InputText @bind-Value="proj.Description" class="form-control" placeholder="Opis" />
-                                            <ValidationMessage For="@(() => proj.Description)" />
+                                            <InputText @bind-Value="asgn.Description" class="form-control" placeholder="Opis" />
+                                            <ValidationMessage For="@(() => asgn.Description)" />
                                         </div>
                                         <div >
-                                            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="proj.DeadlineDateTime" class="form-control" />
-                                            <ValidationMessage For="@(() => proj.DeadlineDateTime)" />
+                                            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="asgn.DeadlineDateTime" class="form-control" />
+                                            <ValidationMessage For="@(() => asgn.DeadlineDateTime)" />
                                         </div>                            
                                         <br />
                                         <p class="formbuttons"><button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg w-40"
@@ -65,21 +66,21 @@ table, th, td {
                             
                             <ModalDialog @ref="EditDialog" Title="Edycja Projektu">
                                 <div class="row">
-                                    <EditForm Model="@proj" EditContext="@editContext">
+                                    <EditForm Model="@asgn" EditContext="@editContext">
                                         <DataAnnotationsValidator />
                                         
                                         <div class="form-group">
-                                            <InputText @bind-Value="proj.ProjectName" class="form-control" placeholder="Nazwa Projektu" />
-                                            <ValidationMessage For="@(() => proj.ProjectName)" />
+                                            <InputText @bind-Value="asgn.Name" class="form-control" placeholder="Nazwa Zadania" />
+                                            <ValidationMessage For="@(() => asgn.Name)" />
                                         </div>
                                         
                                         <div class="form-group">
-                                            <InputText @bind-Value="proj.Description" class="form-control" placeholder="Opis" />
-                                            <ValidationMessage For="@(() => proj.Description)" />
+                                            <InputText @bind-Value="asgn.Description" class="form-control" placeholder="Opis" />
+                                            <ValidationMessage For="@(() => asgn.Description)" />
                                         </div>
                                         <div >
-                                            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="proj.DeadlineDateTime" class="form-control" />
-                                            <ValidationMessage For="@(() => proj.DeadlineDateTime)" />
+                                            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="asgn.DeadlineDateTime" class="form-control" />
+                                            <ValidationMessage For="@(() => asgn.DeadlineDateTime)" />
                                         </div>                            
                                         <br />
                                         <p class="formbuttons"><button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg w-40"
@@ -94,20 +95,16 @@ table, th, td {
         <br/>
         <table style="width:100%">
             <tr>
-                <th style="text-align: center;">Nazwa Projektu</th>
-                <th style="text-align: center;">Opis Projektu</th>
-                <th style="text-align: center;">Data Utworzenia</th>
+                <th style="text-align: center;">Nazwa Zadania</th>
+                <th style="text-align: center;">Opis Zadania</th>
                 <th style="text-align: center;">Data Zwrotu</th>
                 <th style="text-align: center;"></th>
             </tr>
-            @if (projects != null)
-                @foreach (var project in projects)
+            @if (assignments != null)
+                @foreach (var assignment in assignments)
             {
                 <tr>
-                    <td>@project.ProjectName</td><td>@project.Description</td><td>@project.CreationDateTime</td><td>@project.DeadlineDateTime</td>
-                    <td><NavLink href="chat">
-                        <button class="button btn btn-primary btn-lg w-100">Zadania</button>
-                    </NavLink></td>
+                    <td>@assignment.Name</td><td>@assignment.Description</td><td>@assignment.DeadlineDateTime</td>
                     @if (state != null && state.User.IsInRole("admin"))
                     {
                         <td> <button class="button btn btn-primary btn-lg w-100" @onclick="() => EditDialog.Open()">Zarządzaj</button> </td>
@@ -120,12 +117,13 @@ table, th, td {
             </NavLink>        
     </Authorized>
     <NotAuthorized>
-            <style>
-                body { background: red !important; }
-            </style>
-        <div class="center">
-            <img src="/Res/sotp.png" id="sotp" width="90%" height="90%">
-        </div>
+        @code
+        {
+            protected override void OnInitialized()
+            {
+                NavManager.NavigateTo("/");
+            }
+        }
     </NotAuthorized>
 </AuthorizeView>
 
@@ -136,8 +134,8 @@ table, th, td {
     AuthenticationState? state = null;
     
     public string data = "";
-    ProjectDto proj = new ProjectDto();
-    public List<ProjectDto> projects;
+    AssignmentDto asgn = new AssignmentDto();
+    public List<AssignmentDto> assignments;
     private EditContext? editContext;
     
     protected override async Task OnInitializedAsync()
@@ -148,21 +146,21 @@ table, th, td {
             return;
         }
 
-        projects = await ProjectService.GetProjectsAsync();
+        assignments = await AssignmentService.GetAssignmentsAsync();
         
     }
 
     async Task Send()
     {
-        if (proj.ProjectName != "" && proj.DeadlineDateTime != null)
+        if (asgn.Name != "")
         {
-            await ProjectService.AddProject(proj);
+            await AssignmentService.AddAssignment(asgn);
             AddDialog.Close();
         }
 
-        if (proj.ProjectName == "")
+        if (asgn.Name == "")
         {
-            throw new Exception("Projekt musi mieć nazwę.");
+            throw new Exception("Zadanie musi mieć nazwę.");
         }
 
     }
