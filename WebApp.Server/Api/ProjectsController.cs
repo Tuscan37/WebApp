@@ -65,7 +65,7 @@ public class ProjectsController : ControllerBase
         {
             ProjectName = projectDto.ProjectName,
             Description = projectDto.Description,
-            DeadlineDateTime = projectDto.DeadlineDateTime,
+            DeadlineDateTime = Convert.ToDateTime(projectDto.DeadlineDateTime).ToUniversalTime().AddMinutes(60),
             CreationDateTime = DateTime.UtcNow
         };
         _context.Projects.Add(project);
@@ -76,14 +76,21 @@ public class ProjectsController : ControllerBase
 
     // modyfikacja projektu
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateProject(int id, Project project)
+    public async Task<IActionResult> UpdateProject(int id, ProjectDto project)
     {
         if (id != project.Id)
         {
             return BadRequest();
         }
+        
+        var p = new Project
+        {
+            ProjectName = project.ProjectName,
+            Description = project.Description,
+            DeadlineDateTime = Convert.ToDateTime(project.DeadlineDateTime).ToUniversalTime().AddMinutes(60),
+        };
 
-        _context.Entry(project).State = EntityState.Modified;
+        _context.Entry(p).State = EntityState.Modified;
 
         try
         {

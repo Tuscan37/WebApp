@@ -83,7 +83,7 @@ table, th, td {
                                         </div>                            
                                         <br />
                                         <p class="formbuttons"><button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg w-40"
-                                                                       @onclick="EditDialog.Close">Zatwierdź zmiany</button><button class="button mainaction btn btn-secondary btn-lg w-40"  
+                                                                       @onclick="Edit">Zatwierdź zmiany</button><button class="button mainaction btn btn-secondary btn-lg w-40"  
                                                                                                                                     @onclick="() => EditDialog.Close()">Zamknij</button></p>
                                         <br />
                                     </EditForm>
@@ -110,7 +110,7 @@ table, th, td {
                     </NavLink></td>
                     @if (state != null && state.User.IsInRole("admin"))
                     {
-                        <td> <button class="button btn btn-primary btn-lg w-100" @onclick="() => EditDialog.Open()">Zarządzaj</button> </td>
+                        <td> <button class="button btn btn-primary btn-lg w-100" @onclick="() => OpenDialogWithVar(project.Id)">Zarządzaj</button> </td>
                     }
                 </tr>
             }
@@ -133,6 +133,7 @@ table, th, td {
     private ModalDialog AddDialog { get; set; }
     private ModalDialog EditDialog { get; set; }
     public string userName = "";
+    int editedID;
     AuthenticationState? state = null;
     
     public string data = "";
@@ -165,5 +166,26 @@ table, th, td {
             throw new Exception("Projekt musi mieć nazwę.");
         }
 
+    }
+    
+    async Task Edit()
+    {
+        if (proj.ProjectName != "" && proj.DeadlineDateTime != null)
+        {
+            await ProjectService.UpdateProject(editedID, proj);
+            EditDialog.Close();
+        }
+
+        if (proj.ProjectName == "")
+        {
+            throw new Exception("Projekt musi mieć nazwę.");
+        }
+    }
+
+    void OpenDialogWithVar(int projid)
+    {
+        Console.WriteLine("ID: " + projid);
+        editedID = projid;
+        EditDialog.Open();
     }
 }

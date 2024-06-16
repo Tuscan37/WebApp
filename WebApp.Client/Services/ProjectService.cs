@@ -23,6 +23,12 @@ public class ProjectService(HttpClient httpClient)
         using StringContent jsonContent = new(JsonConvert.SerializeObject(proj), Encoding.UTF8, "application/json");
         var responseMessage = await httpClient.PostAsync(BaseUrl, jsonContent);
     }
+    
+    public async Task UpdateProject(int id, ProjectDto proj)
+    {
+        using StringContent jsonContent = new(JsonConvert.SerializeObject(proj), Encoding.UTF8, "application/json");
+        var responseMessage = await httpClient.PutAsync($"{BaseUrl}/{id.ToString()}", jsonContent);
+    }
     public async Task<List<ProjectDto>> SearchProjectsAsync(string searchTerm)
     {
         var response = await httpClient.GetAsync($"{BaseUrl}/search?term={searchTerm}");

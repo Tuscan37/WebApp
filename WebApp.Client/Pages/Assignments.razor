@@ -1,4 +1,4 @@
-﻿@page "/Assignments"
+﻿@page "/Assignments/"
 @using WebApp.Client.Components
 @using WebApp.Client.Services
 @using System.Security.Claims
@@ -33,10 +33,10 @@ table, th, td {
             body { background: white !important; }
         </style>
         <div style="text-align: center;">
-            <h1>Zadania Projektu</h1>
+            <h1>Zadania Projektu @idp</h1>
             @if (state != null && state.User.IsInRole("admin"))
                         {
-                            <button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg text-uppercase w-30" @onclick="() => AddDialog.Open()">Kliknij, aby dodać nowy projekt</button>
+                            <button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg text-uppercase w-30" @onclick="() => AddDialog.Open()">Kliknij, aby dodać nowe zadanie</button>
                             
                             <ModalDialog @ref="AddDialog" Title="Dodawanie Zadania">
                                 <div class="row">
@@ -64,7 +64,7 @@ table, th, td {
                                 </div>
                             </ModalDialog>
                             
-                            <ModalDialog @ref="EditDialog" Title="Edycja Projektu">
+                            <ModalDialog @ref="EditDialog" Title="Edycja Zadania">
                                 <div class="row">
                                     <EditForm Model="@asgn" EditContext="@editContext">
                                         <DataAnnotationsValidator />
@@ -121,7 +121,7 @@ table, th, td {
         {
             protected override void OnInitialized()
             {
-                NavManager.NavigateTo("/");
+                //NavManager.NavigateTo("/");
             }
         }
     </NotAuthorized>
@@ -133,6 +133,7 @@ table, th, td {
     public string userName = "";
     AuthenticationState? state = null;
     
+    int idp = -1;
     public string data = "";
     AssignmentDto asgn = new AssignmentDto();
     public List<AssignmentDto> assignments;
@@ -146,7 +147,7 @@ table, th, td {
             return;
         }
 
-        assignments = await AssignmentService.GetAssignmentsAsync();
+        //assignments = await AssignmentService.GetAssignmentsAsync();
         
     }
 
