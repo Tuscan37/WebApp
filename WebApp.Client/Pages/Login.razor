@@ -41,6 +41,14 @@ img {
         <br />
     </EditForm>
     <br />
+
+        @if (!string.IsNullOrEmpty(Error))
+    {
+        <div class="alert alert-danger" role="alert">
+            @Error
+        </div>
+    }
+    
 </div>
 </body>
 
