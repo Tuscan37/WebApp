@@ -126,4 +126,26 @@ public class UserController : ControllerBase
             }
         });
     }
+
+    [HttpPost("register")]
+    public async Task<ActionResult<RegistrationResult>> Register(UserDto userDto)
+    {
+        if (await _context.Users.AnyAsync(u => u.Username == userDto.Username))
+        {
+            return BadRequest(new RegistrationResult { Successful = false, Message = "Nazwa u¿ytkownika jest ju¿ zajêta." });
+        }
+
+        var user = new User
+        {
+            Username = userDto.Username,
+            Password = userDto.Password,
+            Email = userDto.Email,
+            Role = userDto.Role ?? "User"
+        };
+
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        return Ok(new RegistrationResult { Successful = true, Message = "Rejestracja zakoñczona sukcesem." });
+    }
 }

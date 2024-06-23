@@ -130,8 +130,10 @@ public class ProjectsController : ControllerBase
     [HttpGet("search")]
     public async Task<ActionResult<IEnumerable<ProjectDto>>> SearchProjects(string term)
     {
+        int termAsInt;
+        bool isInt = Int32.TryParse(term, out termAsInt);
         var projects = await _context.Projects
-            .Where(p => p.ProjectName.Contains(term) || p.Description.Contains(term) || p.Id.Equals(Int32.Parse(term)))
+            .Where(p => p.ProjectName.Contains(term) || p.Description.Contains(term) || (isInt && p.Id.Equals(termAsInt)))
             .ToListAsync();
 
         return projects.Select(p => new ProjectDto
