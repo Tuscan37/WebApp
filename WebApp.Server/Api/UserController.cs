@@ -35,7 +35,7 @@ public class UserController : ControllerBase
             });
         }
 
-        if (!user.Password.Equals(loginDto.Password))
+        if (!user.Password.Equals(Hasher.sha256_hash(loginDto.Password)))
         {
             _logger.LogInformation("Log in Login method: bad password");
             return BadRequest(new LoginResult
@@ -138,7 +138,7 @@ public class UserController : ControllerBase
         var user = new User
         {
             Username = userDto.Username,
-            Password = userDto.Password,
+            Password = Hasher.sha256_hash(userDto.Password),
             Email = userDto.Email,
             Role = userDto.Role ?? "User"
         };
