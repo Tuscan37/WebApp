@@ -4,29 +4,51 @@ using WebApp.Shared.Dto;
 
 namespace WebApp.Client.Services;
 
-public class AssignmentService(HttpClient httpClient)
+public class AssignmentService
 {
-    private const string BaseUrl = "/api/Assignments";
+    private readonly HttpClient _httpClient;
+    private const string BaseUrl = "/api/assignments";
+
+    public AssignmentService(HttpClient httpClient)
+    {
+        _httpClient = httpClient;
+    }
 
     public async Task<List<AssignmentDto>> GetAssignmentsAsync()
     {
-        var response = await httpClient.GetAsync(BaseUrl);
-        return JsonConvert.DeserializeObject<List<AssignmentDto>>(await response.Content.ReadAsStringAsync())!;
-    }
-    public async Task<AssignmentDto> GetAssignmentByIdAsync(int id)
-    {
-        var response = await httpClient.GetAsync($"{BaseUrl}/{id.ToString()}");
-        return JsonConvert.DeserializeObject<AssignmentDto>(await response.Content.ReadAsStringAsync())!;
-    }
-    public async Task AddAssignment(AssignmentDto asgn)
-    {
-        using StringContent jsonContent = new(JsonConvert.SerializeObject(asgn), Encoding.UTF8, "application/json");
-        var responseMessage = await httpClient.PostAsync(BaseUrl, jsonContent);
-    }
-    public async Task<List<AssignmentDto>> SearchAssignmentsAsync(string searchTerm)
-    {
-        var response = await httpClient.GetAsync($"{BaseUrl}/search?term={searchTerm}");
+        var response = await _httpClient.GetAsync(BaseUrl);
         return JsonConvert.DeserializeObject<List<AssignmentDto>>(await response.Content.ReadAsStringAsync())!;
     }
 
+    public async Task<AssignmentDto> GetAssignmentByIdAsync(int id)
+    {
+        var response = await _httpClient.GetAsync($"{BaseUrl}/{id}");
+        return JsonConvert.DeserializeObject<AssignmentDto>(await response.Content.ReadAsStringAsync())!;
+    }
+
+    public async Task AddAssignmentAsync(AssignmentDto assignment)
+    {
+        using StringContent jsonContent = new(JsonConvert.SerializeObject(assignment), Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync(BaseUrl, jsonContent);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task UpdateAssignmentAsync(AssignmentDto assignment)
+    {
+        using StringContent jsonContent = new(JsonConvert.SerializeObject(assignment), Encoding.UTF8, "application/json");
+        var response = await _httpClient.PutAsync($"{BaseUrl}/{assignment.Id}", jsonContent);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task DeleteAssignmentAsync(int id)
+    {
+        var response = await _httpClient.DeleteAsync($"{BaseUrl}/{id}");
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task<List<AssignmentDto>> SearchAssignmentsAsync(string searchTerm)
+    {
+        var response = await _httpClient.GetAsync($"{BaseUrl}/search?term={searchTerm}");
+        return JsonConvert.DeserializeObject<List<AssignmentDto>>(await response.Content.ReadAsStringAsync())!;
+    }
 }

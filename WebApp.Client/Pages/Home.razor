@@ -172,7 +172,7 @@ table, th, td {
     {
         if (proj.ProjectName != "" && proj.DeadlineDateTime != null)
         {
-            await ProjectService.UpdateProject(editedID, proj);
+            await ProjectService.UpdateProjectAsync(projects.Find(i => i.Id == editedID));
             EditDialog.Close();
         }
 
