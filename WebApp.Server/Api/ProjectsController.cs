@@ -126,4 +126,24 @@ public class ProjectsController : ControllerBase
         return _context.Projects.Any(e => e.Id == id);
     }
 
+    // wyszukiwanie projektów
+    [HttpGet("search")]
+    public async Task<ActionResult<IEnumerable<ProjectDto>>> SearchProjects(string term)
+    {
+        int termAsInt;
+        bool isInt = Int32.TryParse(term, out termAsInt);
+        var projects = await _context.Projects
+            .Where(p => p.ProjectName.Contains(term) || p.Description.Contains(term) || (isInt && p.Id.Equals(termAsInt)))
+            .ToListAsync();
+
+        return projects.Select(p => new ProjectDto
+        {
+            Id = p.Id,
+            ProjectName = p.ProjectName,
+            Description = p.Description,
+            CreationDateTime = p.CreationDateTime,
+            DeadlineDateTime = p.DeadlineDateTime,
+        }).ToList();
+    }
+
 }

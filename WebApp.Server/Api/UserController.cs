@@ -35,7 +35,7 @@ public class UserController : ControllerBase
             });
         }
 
-        if (!user.Password.Equals(loginDto.Password))
+        if (!user.Password.Equals(Hasher.sha256_hash(loginDto.Password)))
         {
             _logger.LogInformation("Log in Login method: bad password");
             return BadRequest(new LoginResult
@@ -125,5 +125,27 @@ public class UserController : ControllerBase
                 RefreshToken = newRefreshToken
             }
         });
+    }
+
+    [HttpPost("register")]
+    public async Task<ActionResult<RegistrationResult>> Register(UserDto userDto)
+    {
+        if (await _context.Users.AnyAsync(u => u.Username == userDto.Username))
+        {
+            return BadRequest(new RegistrationResult { Successful = false, Message = "Nazwa u¿ytkownika jest ju¿ zajêta." });
+        }
+
+        var user = new User
+        {
+            Username = userDto.Username,
+            Password = Hasher.sha256_hash(userDto.Password),
+            Email = userDto.Email,
+            Role = userDto.Role ?? "User"
+        };
+
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        return Ok(new RegistrationResult { Successful = true, Message = "Rejestracja zakoñczona sukcesem." });
     }
 }

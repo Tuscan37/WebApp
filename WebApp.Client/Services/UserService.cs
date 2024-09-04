@@ -3,6 +3,7 @@ using Blazored.LocalStorage;
 using Newtonsoft.Json;
 using WebApp.Shared.Dto;
 using WebApp.Client.Utility;
+using System.Net.Http;
 
 namespace WebApp.Client.Services;
 
@@ -48,5 +49,22 @@ public class UserService(HttpClient httpClient, ApiAuthenticationStateProvider a
         await localStorageService.RemoveItemAsync("refreshToken");
         var response = await httpClient.PostAsync("/api/user/logout",json);
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+    }
+
+    public async Task<RegistrationResult> Register(UserDto userDto)
+    {
+        using StringContent json = Helpers.GetStringContentFromObject(userDto);
+        var response = await httpClient.PostAsync("/api/user/register", json);
+        var registrationResult = JsonConvert.DeserializeObject<RegistrationResult>(await response.Content.ReadAsStringAsync());
+        if (!response.IsSuccessStatusCode)
+        {
+            if (response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return registrationResult!;
+            }
+
+            throw new Exception("Server Error");
+        }
+        return registrationResult;
     }
 }

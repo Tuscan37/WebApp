@@ -1,5 +1,7 @@
 @page "/Register"
 @inject HttpClient HttpClient
+@inject WebApp.Client.Services.UserService UserService
+@inject NavigationManager NavigationManager
 @using WebApp.Shared.Dto
 
 <PageTitle>Rejestracja nowego użytkownika</PageTitle>
@@ -31,6 +33,11 @@ img {
     </div>
 
     <div class="form-group">
+        <InputText @bind-Value="user.Email" type="email" class="form-control" placeholder="Email" />
+        <ValidationMessage For="@(() => user.Email)" />
+    </div>
+
+    <div class="form-group">
         <InputText @bind-Value="user.Password" type="password" class="form-control" placeholder="Hasło" />
         <ValidationMessage For="@(() => user.Password)" />
     </div>
@@ -50,6 +57,10 @@ img {
         <div class="alert @statusClass" role="alert">
             @registrationMessage
         </div>
+    }
+    @if (registrationStatus == RegistrationStatus.Success)
+    {
+        <button @onclick="RedirectToLogin" class="btn btn-secondary">Zaloguj się !</button>
     }
 </EditForm>
 </div>
@@ -72,20 +83,29 @@ img {
             return;
         }
 
-        // TODO Zamienić userService na żądanie Http do API
-        //if (userService.IsUsernameTaken(user.Username))
-        //{
-        //    registrationStatus = RegistrationStatus.Error;
-        //    registrationMessage = "Nazwa użytkownika jest już zajęta.";
-        //    statusClass = "alert-danger";
-        //    return;
-        //}
+        try
+        {
+            var registrationResult = await UserService.Register(user);
 
-        //await userService.RegisterUser(user);
-
-        registrationStatus = RegistrationStatus.Success;
-        registrationMessage = "Rejestracja zakończona sukcesem!";
-        statusClass = "alert-success";
+            if (registrationResult.Successful)
+            {
+                registrationStatus = RegistrationStatus.Success;
+                registrationMessage = registrationResult.Message;
+                statusClass = "alert-success";
+            }
+            else
+            {
+                registrationStatus = RegistrationStatus.Error;
+                registrationMessage = registrationResult.Message;
+                statusClass = "alert-danger";
+            }
+        }
+        catch (Exception ex)
+        {
+            registrationStatus = RegistrationStatus.Error;
+            registrationMessage = $"Błąd serwera: {ex.Message}";
+            statusClass = "alert-danger";
+        }
     }
 
     public enum RegistrationStatus
@@ -93,5 +113,10 @@ img {
         None,
         Success,
         Error
+    }
+
+    private async Task RedirectToLogin()
+    {
+        NavigationManager.NavigateTo("/Login");
     }
 }
