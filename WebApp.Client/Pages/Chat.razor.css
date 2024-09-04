@@ -1,0 +1,23 @@
+.main{
+    padding-left: 10rem;
+}
+.sidebar{
+    border: 2px solid black;
+    margin-top: 3rem;
+    height: 100%;
+    width: 10rem;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #084298;
+    overflow-x: hidden;
+    border-radius: 0 10px 10px 0;
+}
+
+.hidden{
+    display: none;
+}
+.roomNames{
+    color: lightgreen;
+}

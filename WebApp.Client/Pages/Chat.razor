@@ -1,40 +1,97 @@
 @page "/Chat"
 @using Microsoft.AspNetCore.SignalR.Client
 @using Blazored.LocalStorage
+@using WebApp.Client.Components
 @implements IAsyncDisposable
 @inject NavigationManager NavigationManager
 @inject ILocalStorageService LocalStorage
 <PageTitle>Chat</PageTitle>
-<h1>Hello World!</h1>
-<InputText @bind-Value="RoomTemp"></InputText>
-<button @onclick="SwitchRoom">Switch Room</button>
-<br/>
-<InputText @bind-Value="MessageToSend"></InputText>
-<button @onclick="SendMessage">Send Message</button>
-<br/>
-Messages:
-<ul>
-    @foreach (var message in _messages)
+<!-- <ChatSidebar @ref=ChatSidebar></ChatSidebar> -->
+<style>
+    .inputText
     {
-        <li>@message</li>
+        max-width: 9rem;
     }
-</ul>
+</style>
+<div class="sidebar">
+    <div>
+        <div class="@(IsInARoom ? "hidden" : string.Empty)">
+            <button @onclick="() => CreateRoom(NewRoomName)">Create Room</button><br/>
+            <InputText class="inputText" @bind-Value="NewRoomName"></InputText>
+        </div>
+        <div class="@(IsInARoom ? string.Empty : "hidden")">
+            <button @onclick="() => LeaveRoom()">Leave Room</button>
+        </div>
+
+        <br/>
+    </div>
+    <div>
+        <button @onclick="ToggleRooms">Room list</button>
+        <br/>
+        <div class="@(RoomListHidden ? "hidden" : string.Empty)">
+            <ul>
+                @foreach (var room in _rooms)
+                {
+                    <li class="roomNames">
+                        <button @onclick="() => ClickOnRoom(room.Value)">-></button>
+                        @room.Value.Name
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <!-- <div>
+        <button @onclick="ToggleRoomInfo">Room information</button>
+        <br/>
+        <div class="@(CurrentChatInfoHidden ? "hidden" : string.Empty)">
+            current room stuff
+        </div>
+    </div> -->
+
+</div>
+<div class="main">
+
+    <div class="@(IsInARoom ? string.Empty : "hidden")">
+        <p>Currently in a room: @currentRoom?.Name</p>
+        <br/>
+        <InputText @bind-Value="MessageToSend"></InputText>
+        <button @onclick="SendMessage">Send Message</button>
+    </div>
+
+    <br/>
+    Messages:
+    <ul>
+        @foreach (var message in _messages)
+        {
+            <li><p>@message</p></li>
+        }
+    </ul>
+</div>
 
 @code{
+
+
+    public class RoomDto(string roomId, string name)
+    {
+        public string RoomId { get; } = roomId;
+        public string Name { get; } = name;
+    }
+    
     public string MessageToSend = "";
-    public string RoomTemp = "";
-    public string Room = "";
+    public string NewRoomName = "";
+    public RoomDto? currentRoom = null;
 
     private HubConnection? _hubConnection;
     private readonly List<string> _messages = new();
     protected override async Task OnInitializedAsync()
     {
-            var uri =NavigationManager.BaseUri;
-            var accessToken = await LocalStorage.GetItemAsync<string>("accessToken");
-            if (string.IsNullOrWhiteSpace(accessToken))
-            {
-                NavigationManager.NavigateTo("login");
-            }
+        var uri =NavigationManager.BaseUri;
+        var accessToken = await LocalStorage.GetItemAsync<string>("accessToken");
+        if (string.IsNullOrWhiteSpace(accessToken))
+        {
+            NavigationManager.NavigateTo("login");
+        }
         _hubConnection = new HubConnectionBuilder()
             .WithUrl(uri+"api/chat", o => o.AccessTokenProvider = () => Task.FromResult<string?>(accessToken))
             .Build();
@@ -45,7 +102,7 @@ Messages:
         });
         _hubConnection.On<string,string,string>("ReceiveMessage", (message,senderName,room) =>
         {
-            _messages.Add($"Room Id: {room} | Sent by: {senderName} | {message}");
+            _messages.Add($"[Sent by: {senderName}] {message}");
             InvokeAsync(StateHasChanged);
         });
         _hubConnection.On<string>("UserConnectedToRoom", (userName) =>
@@ -53,17 +110,56 @@ Messages:
             _messages.Add($"User {userName} connected to room!");
             InvokeAsync(StateHasChanged);
         });
+        _hubConnection.On<string>("ReceiveNotification", (notification) =>
+        {
+            _messages.Add($"Notification: {notification}");
+        });
+        _hubConnection.On<string, string>("ReceiveNewRoomCreated", (roomId, name) =>
+        {
+            var room = new RoomDto(roomId, name);
+            AddRoomToList(room);
+        });
+        _hubConnection.On<List<RoomDto>>("ReceiveAllRooms", (rooms) =>
+        {
+            AddAllRoomsToList(rooms);
+
+            InvokeAsync(StateHasChanged);
+        });
+        _hubConnection.On<string>("ReceiveRoomRemoved", (roomId) =>
+        {
+            RemoveRoomFromList(roomId);
+        });
+        _hubConnection.On<RoomDto>("ReceiveRoomCreatedConfirmation", (room) =>
+        {
+            currentRoom = room;
+            IsInARoom = true;
+            _messages.Clear();
+            InvokeAsync(StateHasChanged);
+        });
+        _hubConnection.On<RoomDto>("ReceiveRoomJoinedRoomConfirmation", (room) =>
+        {
+            currentRoom = room;
+            IsInARoom = true;
+            _messages.Clear();
+            InvokeAsync(StateHasChanged);
+        });
+        //_hubConnection.On<RoomDto>("ReceiveRoomLeftRoomConfirmation", (room) =>
+        //{
+        //    currentRoom = room;
+        //    CreateNewRoomHidden = true;
+        //    InvokeAsync(StateHasChanged);
+        //});
         await _hubConnection.StartAsync();
     }
 
     async Task SendMessage()
     {
-        var uri =NavigationManager.BaseUri;
+        if(currentRoom == null) return;
         if (string.IsNullOrWhiteSpace(MessageToSend))
         {
             return;
         }
-        await _hubConnection!.SendAsync("SendMessage", MessageToSend,Room);
+        await _hubConnection!.SendAsync("SendMessage", MessageToSend, currentRoom.RoomId);
         
     }
 
@@ -75,10 +171,74 @@ Messages:
         }
     }
 
-    public async Task SwitchRoom()
+    public async Task CreateRoom(string name)
     {
-        await _hubConnection!.SendAsync("LeaveRoom", Room);
-        Room = RoomTemp;
-        await _hubConnection!.SendAsync("JoinRoom", Room);
+        await _hubConnection!.SendAsync("CreateRoom",name);
+    }
+
+    public async Task JoinRoom(string roomId)
+    {
+        if (currentRoom is null || !currentRoom.RoomId.Equals(roomId))
+        {
+            await _hubConnection!.SendAsync("JoinRoom", roomId);
+        }
+
+    }
+
+    public async Task LeaveRoom()
+    {
+        await _hubConnection!.SendAsync("LeaveRoom", currentRoom!.RoomId);
+        currentRoom = null;
+        IsInARoom = false;
+    }
+    
+
+    /*
+     *
+     * Sidebar
+     *
+     * 
+     */
+    
+    public bool RoomListHidden = false;
+    public bool CurrentChatInfoHidden = true;
+    public bool IsInARoom = false;
+
+    Dictionary<string, RoomDto> _rooms = new Dictionary<string, Chat.RoomDto>();
+    //public RoomDto? SelectedRoom = null;
+    public void AddAllRoomsToList(List<RoomDto> rooms)
+    {
+        _rooms.Clear();
+        foreach(var room in rooms)
+        {
+            _rooms.TryAdd(room.RoomId, room);
+        }
+    }
+    public void AddRoomToList(RoomDto room)
+    {
+        _rooms.TryAdd(room.RoomId,room);
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void RemoveRoomFromList(string roomId)
+    {
+        _rooms.Remove(roomId);
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ClickOnRoom(RoomDto room)
+    {
+        await JoinRoom(room.RoomId);
+        //SelectedRoom = room;
+    }
+    
+    private void ToggleRooms()
+    {
+        RoomListHidden = !RoomListHidden;
+    }
+
+    private void ToggleRoomInfo()
+    {
+        CurrentChatInfoHidden = !CurrentChatInfoHidden;
     }
 }

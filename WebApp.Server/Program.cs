@@ -21,6 +21,9 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<TokenService>();
 builder.Services.AddHostedService<DatabaseCleanupService>();
+builder.Services.AddSingleton<IDictionary<string, Room>>(opt =>
+    new Dictionary<string, Room>());
+builder.Services.AddSingleton<HubMemory>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
