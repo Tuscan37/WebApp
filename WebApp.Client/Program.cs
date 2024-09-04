@@ -15,6 +15,7 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<ApiAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<ApiAuthenticationStateProvider>());
 builder.Services.AddScoped<ProjectService>();
+builder.Services.AddScoped<AssignmentService>();
 builder.Services.AddScoped<UserService>();
 
 await builder.Build().RunAsync();

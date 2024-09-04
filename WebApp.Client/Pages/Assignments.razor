@@ -1,0 +1,208 @@
+﻿@page "/Assignments/{ProjectId:int}"
+@using WebApp.Client.Components
+@using WebApp.Client.Services
+@using System.Security.Claims
+@using System.Text
+@using Newtonsoft.Json
+@using WebApp.Shared.Dto
+@inject HttpClient HttpClient
+@inject AssignmentService AssignmentService
+@inject UserService UserService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavManager
+@inject ProjectService ProjectService
+
+<PageTitle>Zadania</PageTitle>
+
+<style>
+    .center {
+        margin: auto;
+    }
+
+    img {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    table, th, td {
+        border: 1px solid black;
+    }
+</style>
+
+<AuthorizeView Context="authContext">
+    <Authorized>
+        <h1>Zadania Projektu @project?.ProjectName</h1>
+
+        @if (state != null && state.User.IsInRole("admin"))
+        {
+            <button class="btn btn-primary" @onclick="ShowAddDialog">Dodaj Zadanie</button>
+
+            <!-- Dodaj nowe zadanie -->
+            <ModalDialog @ref="AddDialog" Title="Dodaj nowe zadanie">
+                <EditForm Model="@asgn">
+                    <DataAnnotationsValidator />
+                    <div class="form-group">
+                        <InputText @bind-Value="asgn.Name" class="form-control" placeholder="Nazwa zadania" />
+                        <ValidationMessage For="@(() => asgn.Name)" />
+                    </div>
+                    <div class="form-group">
+                        <InputTextArea @bind-Value="asgn.Description" class="form-control" placeholder="Opis zadania" />
+                        <ValidationMessage For="@(() => asgn.Description)" />
+                    </div>
+                    <div class="form-group">
+                        <InputNumber @bind-Value="asgn.Priority" class="form-control" placeholder="Priority(1-5)" />
+                        <ValidationMessage For="@(() => asgn.Priority)" />
+                    </div>
+                    <div class="form-group">
+                        <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="asgn.DeadlineDateTime" class="form-control" />
+                        <ValidationMessage For="@(() => asgn.DeadlineDateTime)" />
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" @onclick="AddAssignment">Dodaj</button>
+                    </div>
+                </EditForm>
+            </ModalDialog>
+
+            <!-- Edytuj zadanie -->
+            <ModalDialog @ref="EditDialog" Title="Edytuj zadanie">
+                <EditForm Model="@asgn">
+                    <DataAnnotationsValidator />
+                    <div class="form-group">
+                        <InputText @bind-Value="asgn.Name" class="form-control" placeholder="Nazwa zadania" />
+                        <ValidationMessage For="@(() => asgn.Name)" />
+                    </div>
+                    <div class="form-group">
+                        <InputTextArea @bind-Value="asgn.Description" class="form-control" placeholder="Opis zadania" />
+                        <ValidationMessage For="@(() => asgn.Description)" />
+                    </div>
+                    <div class="form-group">
+                        <InputNumber @bind-Value="asgn.Priority" class="form-control" placeholder="Priority(1-5)" />
+                        <ValidationMessage For="@(() => asgn.Priority)" />
+                    </div>
+                    <div class="form-group">
+                        <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="asgn.DeadlineDateTime" class="form-control" />
+                        <ValidationMessage For="@(() => asgn.DeadlineDateTime)" />
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" @onclick="UpdateAssignment">Zaktualizuj</button>
+                    </div>
+                </EditForm>
+            </ModalDialog>
+        }
+
+        <!-- Lista zadań -->
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Nazwa zadania</th>
+                    <th>Opis</th>
+                    <th>Priorytet</th>
+                    <th>Termin</th>
+                    @if (state != null && state.User.IsInRole("admin"))
+                    {
+                        <th>Akcje</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var assignment in assignments)
+                {
+                    <tr>
+                        <td>@assignment.Name</td>
+                        <td>@assignment.Description</td>
+                        <td>@assignment.Priority</td>
+                        <td>@assignment.DeadlineDateTime</td>
+                        @if (state != null && state.User.IsInRole("admin"))
+                        {
+                            <td>
+                                <button class="btn btn-primary" @onclick="() => EditAssignment(assignment)">Edytuj</button>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </Authorized>
+    <NotAuthorized>
+        <style>
+            body {
+                background: red !important;
+            }
+        </style>
+        <div class="center">
+            <img src="/Res/sotp.png" id="sotp" width="90%" height="90%">
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int ProjectId { get; set; }
+
+    private ModalDialog AddDialog { get; set; }
+    private ModalDialog EditDialog { get; set; }
+    private AuthenticationState? state = null;
+    private ProjectDto? project;
+    private AssignmentDto asgn = new AssignmentDto();
+    private List<AssignmentDto> assignments = new List<AssignmentDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            if (state?.User.Claims.Any() == true)
+            {
+                project = await ProjectService.GetProjectByIdAsync(ProjectId);
+                assignments = await AssignmentService.GetAssignmentsByProjectIdAsync(ProjectId);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error initializing: {ex.Message}");
+        }
+    }
+
+    private async Task AddAssignment()
+    {
+        try
+        {
+            asgn.Project = project;
+            await AssignmentService.AddAssignmentAsync(asgn);
+            AddDialog.Close();
+            assignments = await AssignmentService.GetAssignmentsByProjectIdAsync(ProjectId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error adding assignment: {ex.Message}");
+        }
+    }
+
+    private void ShowAddDialog()
+    {
+        asgn = new AssignmentDto();
+        AddDialog.Open();
+    }
+
+    private void EditAssignment(AssignmentDto assignment)
+    {
+        asgn = assignment;
+        EditDialog.Open();
+    }
+
+    private async Task UpdateAssignment()
+    {
+        try
+        {
+            asgn.Project = project;
+            await AssignmentService.UpdateAssignmentAsync(asgn);
+            EditDialog.Close();
+            assignments = await AssignmentService.GetAssignmentsByProjectIdAsync(ProjectId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating assignment: {ex.Message}");
+        }
+    }
+}

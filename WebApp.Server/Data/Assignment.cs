@@ -11,5 +11,5 @@ public class Assignment
     public int? Priority { get; set; }
     [MaxLength(1000)]
     public string? Description { get; set; }
-    public DateTime DeadlineDateTime { get; set; }
+    public DateTime? DeadlineDateTime { get; set; }
 }

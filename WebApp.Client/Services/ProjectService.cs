@@ -22,6 +22,18 @@ public class ProjectService(HttpClient httpClient)
     {
         using StringContent jsonContent = new(JsonConvert.SerializeObject(proj), Encoding.UTF8, "application/json");
         var responseMessage = await httpClient.PostAsync(BaseUrl, jsonContent);
+        responseMessage.EnsureSuccessStatusCode();
+    }
+    public async Task UpdateProjectAsync(ProjectDto proj)
+    {
+        using StringContent jsonContent = new(JsonConvert.SerializeObject(proj), Encoding.UTF8, "application/json");
+        var response = await httpClient.PutAsync($"{BaseUrl}/{proj.Id}", jsonContent);
+        response.EnsureSuccessStatusCode();
+    }
+        public async Task DeleteProject(int id)
+    {
+        var response = await httpClient.DeleteAsync($"{BaseUrl}/{id}");
+        response.EnsureSuccessStatusCode();
     }
     public async Task<List<ProjectDto>> SearchProjectsAsync(string searchTerm)
     {

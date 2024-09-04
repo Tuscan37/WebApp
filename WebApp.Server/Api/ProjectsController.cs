@@ -59,13 +59,13 @@ public class ProjectsController : ControllerBase
 
     // nowy projekt
     [HttpPost]
-    public async Task<ActionResult<Project>> CreateProject(string projectName, string description, DateTime? deadline)
+    public async Task<ActionResult<Project>> CreateProject(ProjectDto projectDto)
     {
         var project = new Project
         {
-            ProjectName = projectName,
-            Description = description,
-            DeadlineDateTime = deadline,
+            ProjectName = projectDto.ProjectName,
+            Description = projectDto.Description,
+            DeadlineDateTime = Convert.ToDateTime(projectDto.DeadlineDateTime).ToUniversalTime().AddMinutes(60),
             CreationDateTime = DateTime.UtcNow
         };
         _context.Projects.Add(project);
@@ -76,14 +76,24 @@ public class ProjectsController : ControllerBase
 
     // modyfikacja projektu
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateProject(int id, Project project)
+    public async Task<IActionResult> UpdateProject(int id, ProjectDto project)
     {
         if (id != project.Id)
         {
             return BadRequest();
         }
 
-        _context.Entry(project).State = EntityState.Modified;
+        var existingProject = await _context.Projects.FindAsync(id);
+        if (existingProject == null)
+        {
+            return NotFound();
+        }
+
+        // Aktualizowanie właściwości projektu
+        existingProject.ProjectName = project.ProjectName;
+        existingProject.Description = project.Description;
+        existingProject.DeadlineDateTime = Convert.ToDateTime(project.DeadlineDateTime).ToUniversalTime().AddMinutes(60);
+        //existingProject.CreationDateTime = project.CreationDateTime;
 
         try
         {
@@ -103,6 +113,7 @@ public class ProjectsController : ControllerBase
 
         return NoContent();
     }
+
 
     // usuniecie projektu
     [HttpDelete("{id}")]

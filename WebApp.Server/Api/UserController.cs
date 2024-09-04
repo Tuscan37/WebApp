@@ -132,7 +132,7 @@ public class UserController : ControllerBase
     {
         if (await _context.Users.AnyAsync(u => u.Username == userDto.Username))
         {
-            return BadRequest(new RegistrationResult { Successful = false, Message = "Nazwa u¿ytkownika jest ju¿ zajêta." });
+            return BadRequest(new RegistrationResult { Successful = false, Message = "Nazwa uzytkownika jest juz zajeta." });
         }
 
         var user = new User
@@ -146,6 +146,6 @@ public class UserController : ControllerBase
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        return Ok(new RegistrationResult { Successful = true, Message = "Rejestracja zakoñczona sukcesem." });
+        return Ok(new RegistrationResult { Successful = true, Message = "Rejestracja zakonczona sukcesem." });
     }
 }

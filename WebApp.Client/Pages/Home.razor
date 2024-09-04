@@ -1,157 +1,151 @@
 ﻿@page "/"
 @using WebApp.Client.Components
 @using WebApp.Client.Services
+@using System.Security.Claims
 @using System.Text
 @using Newtonsoft.Json
 @using WebApp.Shared.Dto
+@inject HttpClient HttpClient
 @inject ProjectService ProjectService
+@inject UserService UserService
+@inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Home</PageTitle>
 
 <style>
-    .center {
-        margin: auto;
-    }
-
-    img {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    table, th, td {
-        border: 1px solid black;
-    }
+.center {
+  margin: auto;
+}
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+table, th, td {
+  border:1px solid black;
+}
 </style>
 
 <AuthorizeView Context="authContext">
     <Authorized>
         <style>
-            body {
-                background: white !important;
-            }
+            body { background: white !important; }
         </style>
         <div style="text-align: center;">
             <h1>Projekty</h1>
             @if (state != null && state.User.IsInRole("admin"))
-            {
-                <button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg text-uppercase w-30" @onclick="() => AddDialog.Open()">Kliknij, aby dodać nowy projekt</button>
-
-                <ModalDialog @ref="AddDialog" Title="Dodawanie Projektu">
-                    <div class="row">
-                        <EditForm Model="@proj" EditContext="@editContext">
-                            <DataAnnotationsValidator />
-
-                            <div class="form-group">
-                                <InputText @bind-Value="proj.ProjectName" class="form-control" placeholder="Nazwa Projektu" />
-                                <ValidationMessage For="@(() => proj.ProjectName)" />
-                            </div>
-
-                            <div class="form-group">
-                                <InputText @bind-Value="proj.Description" class="form-control" placeholder="Opis" />
-                                <ValidationMessage For="@(() => proj.Description)" />
-                            </div>
-                            <div>
-                                <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="proj.DeadlineDateTime" class="form-control" />
-                                <ValidationMessage For="@(() => proj.DeadlineDateTime)" />
-                            </div>
-                            <br />
-                            <p class="formbuttons">
-                                <button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg w-40"
-                                        @onclick="Send">
-                                    Dodaj
-                                </button><button class="button mainaction btn btn-secondary btn-lg w-40" @onclick="() => AddDialog.Close()">Zamknij</button>
-                            </p>
-                            <br />
-                        </EditForm>
-                    </div>
-                </ModalDialog>
-
-                <ModalDialog @ref="EditDialog" Title="Edycja Projektu">
-                    <div class="row">
-                        <EditForm Model="@proj" EditContext="@editContext">
-                            <DataAnnotationsValidator />
-
-                            <div class="form-group">
-                                <InputText @bind-Value="proj.ProjectName" class="form-control" placeholder="Nazwa Projektu" />
-                                <ValidationMessage For="@(() => proj.ProjectName)" />
-                            </div>
-
-                            <div class="form-group">
-                                <InputText @bind-Value="proj.Description" class="form-control" placeholder="Opis" />
-                                <ValidationMessage For="@(() => proj.Description)" />
-                            </div>
-                            <div>
-                                <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="proj.DeadlineDateTime" class="form-control" />
-                                <ValidationMessage For="@(() => proj.DeadlineDateTime)" />
-                            </div>
-                            <br />
-                            <p class="formbuttons">
-                                <button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg w-40"
-                                        @onclick="EditDialog.Close">
-                                    Zatwierdź zmiany
-                                </button><button class="button mainaction btn btn-secondary btn-lg w-40"
-                                                 @onclick="() => EditDialog.Close()">
-                                    Zamknij
-                                </button>
-                            </p>
-                            <br />
-                        </EditForm>
-                    </div>
-                </ModalDialog>
-            }
+                        {
+                            <button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg text-uppercase w-30" @onclick="() => AddDialog.Open()">Kliknij, aby dodać nowy projekt</button>
+                            
+                            <ModalDialog @ref="AddDialog" Title="Dodawanie Projektu">
+                                <div class="row">
+                                    <EditForm  Model="@proj" >
+                                        <DataAnnotationsValidator />
+                                        
+                                        <div class="form-group">
+                                            <InputText @bind-Value="proj.ProjectName" class="form-control" placeholder="Nazwa Projektu" />
+                                            <ValidationMessage For="@(() => proj.ProjectName)" />
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <InputText @bind-Value="proj.Description" class="form-control" placeholder="Opis" />
+                                            <ValidationMessage For="@(() => proj.Description)" />
+                                        </div>
+                                        <div >
+                                            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="proj.DeadlineDateTime" class="form-control" />
+                                            <ValidationMessage For="@(() => proj.DeadlineDateTime)" />
+                                        </div>                            
+                                        <br />
+                                        <p class="formbuttons"><button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg w-40"
+                                                                       @onclick="Send">Dodaj</button><button class="button mainaction btn btn-secondary btn-lg w-40"  @onclick="() => AddDialog.Close()">Zamknij</button></p>
+                                        <br />
+                                    </EditForm>
+                                </div>
+                            </ModalDialog>
+                            
+                            <ModalDialog @ref="EditDialog" Title="Edycja Projektu">
+                                <div class="row">
+                                    <EditForm Model="@proj">
+                                        <DataAnnotationsValidator />
+                                        
+                                        <div class="form-group">
+                                            <InputText @bind-Value="proj.ProjectName" class="form-control" placeholder="Nazwa Projektu" />
+                                            <ValidationMessage For="@(() => proj.ProjectName)" />
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <InputText @bind-Value="proj.Description" class="form-control" placeholder="Opis" />
+                                            <ValidationMessage For="@(() => proj.Description)" />
+                                        </div>
+                                        <div >
+                                            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="proj.DeadlineDateTime" class="form-control" />
+                                            <ValidationMessage For="@(() => proj.DeadlineDateTime)" />
+                                        </div>                            
+                                        <br />
+                                        <p class="formbuttons"><button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg w-40"
+                                                                       @onclick="Edit">Zatwierdź zmiany</button><button class="button mainaction btn btn-secondary btn-lg w-40"  
+                                                                                                                                    @onclick="() => EditDialog.Close()">Zamknij</button></p>
+                                        <br />
+                                    </EditForm>
+                                </div>
+                            </ModalDialog>
+                        }
         </div>
         <div style="display: flex; justify-content: center; align-items: center; margin: 20px 0;">
             <input @bind="searchTerm" placeholder="Wpisz frazę wyszukiwania" class="form-control" style="width: 300px; display: inline-block;" />
             <button @onclick="SearchProjects" class="btn btn-primary" style="margin-left: 10px;">Szukaj</button>
         </div>
-        <br />
+        <br/>
         <table style="width:100%">
             <tr>
                 <th style="text-align: center;">Nazwa Projektu</th>
                 <th style="text-align: center;">Opis Projektu</th>
                 <th style="text-align: center;">Data Utworzenia</th>
                 <th style="text-align: center;">Data Zwrotu</th>
+                <th style="text-align: center;"></th>
+                <th style="text-align: center;"></th>
             </tr>
             @if (projects != null)
                 @foreach (var project in projects)
-                {
-                    <tr>
-                        <td>@project.ProjectName</td>
-                        <td>@project.Description</td>
-                        <td>@project.CreationDateTime</td>
-                        <td>@project.DeadlineDateTime</td>
-                        @if (state != null && state.User.IsInRole("admin"))
-                        {
-                            <td> <button class="button btn btn-primary btn-lg w-100" @onclick="() => EditDialog.Open()">Zarządzaj</button> </td>
-                        }
-                    </tr>
-                }
+            {
+                <tr>
+                    <td>@project.ProjectName</td><td>@project.Description</td><td>@project.CreationDateTime</td><td>@project.DeadlineDateTime</td>
+                    @if (state != null && state.User.IsInRole("admin"))
+                    {
+                        <td> <button class="button btn btn-primary btn-lg w-100" @onclick="() => OpenDialogWithVar(project.Id)">Zarządzaj</button> </td>
+                    }
+                        <td>
+                            <button class="button btn btn-secondary btn-lg w-100" @onclick="() => NavigateToAssignments(project.Id)">Zadania</button>
+                        </td>
+                </tr>
+            }
         </table>
+            <NavLink href="chat">
+                <button class="button btn btn-primary btn-lg">Czat</button>
+            </NavLink>        
     </Authorized>
     <NotAuthorized>
-        <style>
-            body {
-                background: red !important;
-            }
-        </style>
+            <style>
+                body { background: red !important; }
+            </style>
         <div class="center">
             <img src="/Res/sotp.png" id="sotp" width="90%" height="90%">
         </div>
     </NotAuthorized>
 </AuthorizeView>
 
-
 @code {
     private ModalDialog AddDialog { get; set; }
     private ModalDialog EditDialog { get; set; }
     public string userName = "";
+    int editedID;
     AuthenticationState? state = null;
+
     public string data = "";
     ProjectDto proj = new ProjectDto();
     public List<ProjectDto> projects = new List<ProjectDto>();
-    private EditContext? editContext;
+    //private EditContext? editContext;
     private string searchTerm;
 
     protected override async Task OnInitializedAsync()
@@ -172,7 +166,6 @@
         {
             await ProjectService.AddProject(proj);
             AddDialog.Close();
-            Console.WriteLine(proj.DeadlineDateTime);
         }
 
         if (proj.ProjectName == "")
@@ -180,6 +173,20 @@
             throw new Exception("Projekt musi mieć nazwę.");
         }
 
+    }
+
+    async Task Edit()
+    {
+        if (proj.ProjectName != "" && proj.DeadlineDateTime != null)
+        {
+            await ProjectService.UpdateProjectAsync(proj);
+            EditDialog.Close();
+        }
+
+        if (proj.ProjectName == "")
+        {
+            throw new Exception("Projekt musi mieć nazwę.");
+        }
     }
 
     private async Task SearchProjects()
@@ -192,5 +199,19 @@
         {
             projects = await ProjectService.SearchProjectsAsync(searchTerm);
         }
+    }
+
+    void OpenDialogWithVar(int projid)
+    {
+        Console.WriteLine("ID: " + projid);
+        editedID = projid;
+        proj = projects.FirstOrDefault(p => p.Id == editedID) ?? new ProjectDto();
+        proj.Id = projid;
+        EditDialog.Open();
+    }
+
+    private void NavigateToAssignments(int projectId)
+    {
+        NavigationManager.NavigateTo($"/Assignments/{projectId}");
     }
 }

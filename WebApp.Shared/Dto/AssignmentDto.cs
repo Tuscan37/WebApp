@@ -7,6 +7,6 @@ public class AssignmentDto
     public string Name { get; set; }
     public int? Priority { get; set; }
     public string Description { get; set; }
-    public DateTime DeadlineDateTime { get; set; }
+    public DateTime? DeadlineDateTime { get; set; }
 }
 
