@@ -26,10 +26,10 @@
     public bool RoomListHidden = false;
     public bool CurrentChatInfoHidden = true;
 
-    Dictionary<string, Chat.Room> _rooms = new Dictionary<string, Chat.Room>();
+    Dictionary<string, Chat.RoomDto> _rooms = new Dictionary<string, Chat.RoomDto>();
     //List<Chat.Chat.Room> _rooms = new();
-    public Chat.Room? SelectedRoom = null;
-    public void AddRoom(Chat.Room room)
+    public Chat.RoomDto? SelectedRoom = null;
+    public void AddRoom(Chat.RoomDto room)
     {
         _rooms.TryAdd(room.RoomId,room);
         InvokeAsync(StateHasChanged);
@@ -40,7 +40,7 @@
         
     }
 
-    private void ClickOnRoom(Chat.Room room)
+    private void ClickOnRoom(Chat.RoomDto room)
     {
         SelectedRoom = room;
     }
