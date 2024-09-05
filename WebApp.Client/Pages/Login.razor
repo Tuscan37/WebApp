@@ -39,6 +39,12 @@ img {
          <p class="formbuttons"><button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg text-uppercase w-100">Zaloguj</button>
         </p>
         <br />
+            @if (loginStatus == LoginStatus.Error)
+            {
+                <div class="alert @statusClass" role="alert">
+                    @loginMessage
+                </div>
+            }
     </EditForm>
     <br />
 </div>
@@ -48,7 +54,9 @@ img {
 
 @code {
     private LoginDto loginDto = new();
-    private string Error = "";
+    private LoginStatus loginStatus = LoginStatus.None;
+    private string loginMessage = "";
+    private string statusClass = "";
 
     private async Task LoginUser()
     {
@@ -59,9 +67,17 @@ img {
         }
         else
         {
-            Error = result.Error;
-            // tutaj powinien być jakiś system do pokazywania komunikatów
+            loginStatus = LoginStatus.Error;
+            loginMessage = "Niepoprawny email lub hasło.";
+            statusClass = "alert-danger";
+            return;
         }
     }
 
+    public enum LoginStatus
+    {
+        None,
+        Success,
+        Error
+    }
 }
