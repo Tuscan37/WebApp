@@ -67,7 +67,12 @@ namespace WebApp.Test
 
             var controller = new ProjectsController(_context);
 
-            var result = await controller.CreateProject(newProject.ProjectName, newProject.Description, newProject.DeadlineDateTime);
+            var result = await controller.CreateProject(new ProjectDto
+            {
+                ProjectName = newProject.ProjectName,
+                Description = newProject.Description,
+                DeadlineDateTime = newProject.DeadlineDateTime
+            });
             var createdResult = result.Result as CreatedAtActionResult;
             var createdProject = createdResult.Value as Project;
 
@@ -87,7 +92,13 @@ namespace WebApp.Test
 
             var controller = new ProjectsController(_context);
 
-            var result = await controller.UpdateProject(project.Id, project);
+            var result = await controller.UpdateProject(project.Id, new ProjectDto
+            {
+                ProjectName = project.ProjectName,
+                Description = project.Description,
+                CreationDateTime = project.CreationDateTime
+                
+            });
             var noContentResult = result as NoContentResult;
 
             Assert.NotNull(noContentResult);
