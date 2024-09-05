@@ -83,12 +83,29 @@ table, th, td {
                                             <ValidationMessage For="@(() => proj.DeadlineDateTime)" />
                                         </div>                            
                                         <br />
-                                        <p class="formbuttons"><button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg w-40"
-                                                                       @onclick="Edit">Zatwierdź zmiany</button><button class="button mainaction btn btn-secondary btn-lg w-40"  
-                                                                                                                                    @onclick="() => EditDialog.Close()">Zamknij</button></p>
+                                        <p class="formbuttons">
+                                            
+                                            <button type="submit" id="submit" class="button mainaction submit btn btn-primary btn-lg w-40"
+                                                    @onclick="Edit">Zatwierdź zmiany</button>
+                                            <button class="button mainaction btn btn-secondary btn-lg w-40"
+                                                    @onclick="() => EditDialog.Close()">Zamknij</button>
+                                            <button class="button mainaction btn btn-danger btn-lg w-40"
+                                                    @onclick="() => RemoveWarning.Open()">Usuń projekt</button>
+                                        </p>
                                         <br />
                                     </EditForm>
                                 </div>
+                            </ModalDialog>
+                            
+                            <ModalDialog @ref="RemoveWarning" Title="Usuń projekt">
+                                <br /><br />
+                                <h1>Czy na pewno chcesz usunąć ten projekt?</h1>
+                                <br /><br />
+                                <button class="button mainaction btn btn-danger btn-lg w-40"
+                                        @onclick="Remove">TAK</button>
+                                <button class="button mainaction btn btn-secondary btn-lg w-40"
+                                        @onclick="() => RemoveWarning.Close()">NIE</button>
+
                             </ModalDialog>
                         }
         </div>
@@ -108,18 +125,18 @@ table, th, td {
             </tr>
             @if (projects != null)
                 @foreach (var project in projects)
-            {
-                <tr>
-                    <td>@project.ProjectName</td><td>@project.Description</td><td>@project.CreationDateTime</td><td>@project.DeadlineDateTime</td>
-                    @if (state != null && state.User.IsInRole("admin"))
-                    {
-                        <td> <button class="button btn btn-primary btn-lg w-100" @onclick="() => OpenDialogWithVar(project.Id)">Zarządzaj</button> </td>
-                    }
-                        <td>
-                            <button class="button btn btn-secondary btn-lg w-100" @onclick="() => NavigateToAssignments(project.Id)">Zadania</button>
-                        </td>
-                </tr>
-            }
+                {
+                    <tr>
+                        <td>@project.ProjectName</td><td>@project.Description</td><td>@project.CreationDateTime</td><td>@project.DeadlineDateTime</td>
+                        @if (state != null && state.User.IsInRole("admin"))
+                        {
+                            <td> <button class="button btn btn-primary btn-lg w-100" @onclick="() => OpenDialogWithVar(project.Id)">Zarządzaj</button> </td>
+                        }
+                            <td>
+                                <button class="button btn btn-secondary btn-lg w-100" @onclick="() => NavigateToAssignments(project.Id)">Zadania</button>
+                            </td>
+                    </tr>
+                }
         </table>
             <NavLink href="chat">
                 <button class="button btn btn-primary btn-lg">Czat</button>
@@ -138,6 +155,7 @@ table, th, td {
 @code {
     private ModalDialog AddDialog { get; set; }
     private ModalDialog EditDialog { get; set; }
+    private ModalDialog RemoveWarning { get; set; }
     public string userName = "";
     int editedID;
     AuthenticationState? state = null;
@@ -187,6 +205,14 @@ table, th, td {
         {
             throw new Exception("Projekt musi mieć nazwę.");
         }
+    }
+
+    async Task Remove()
+    {
+        await ProjectService.DeleteProject(proj);
+        EditDialog.Close();
+        RemoveWarning.Close();
+        projects = await ProjectService.GetProjectsAsync();
     }
 
     private async Task SearchProjects()
