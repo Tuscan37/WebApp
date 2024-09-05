@@ -41,9 +41,10 @@ public class AssignmentService
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task DeleteAssignmentAsync(int id)
+    public async Task DeleteAssignmentAsync(AssignmentDto assignment)
     {
-        var response = await _httpClient.DeleteAsync($"{BaseUrl}/{id}");
+        using StringContent jsonContent = new(JsonConvert.SerializeObject(assignment), Encoding.UTF8, "application/json");
+        var response = await _httpClient.DeleteAsync($"{BaseUrl}/{assignment.Id}");
         response.EnsureSuccessStatusCode();
     }
 
