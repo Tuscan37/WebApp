@@ -16,17 +16,17 @@
 <div class="sidebar">
     <div style="margin-left: 0.33rem; margin-top: 0.33rem">
         <div class="@(IsInARoom ? "hidden" : string.Empty)">
-            <button @onclick="() => CreateRoom(NewRoomName)">Create Room</button><br/>
+            <button @onclick="() => CreateRoom(NewRoomName)">Utwórz pokój</button><br/>
             <InputText class="inputText" @bind-Value="NewRoomName"></InputText>
         </div>
         <div class="@(IsInARoom ? string.Empty : "hidden")">
-            <button @onclick="() => LeaveRoom()">Leave Room</button>
+            <button @onclick="() => LeaveRoom()">Opóść pokój</button>
         </div>
 
         <br/>
     </div>
     <div style="margin-left: 0.33rem">
-        <button @onclick="ToggleRooms">Room list</button>
+        <button @onclick="ToggleRooms">Lista pokojów</button>
         <br/>
         <div class="@(RoomListHidden ? "hidden" : string.Empty)">
             <ul>
@@ -53,14 +53,14 @@
 <div class="main">
 
     <div class="@(IsInARoom ? string.Empty : "hidden")">
-        <p>Currently in a room: @currentRoom?.Name</p>
+        <p>Obecny pokój: @currentRoom?.Name</p>
         <br/>
         <InputText @bind-Value="MessageToSend"></InputText>
-        <button @onclick="SendMessage">Send Message</button>
+        <button @onclick="SendMessage">Wyślij wiadomość</button>
     </div>
 
     <br/>
-    Messages:
+    Wiadomości:
     <ul>
         @foreach (var message in _messages)
         {
@@ -102,17 +102,17 @@
         });
         _hubConnection.On<string,string,string>("ReceiveMessage", (message,senderName,room) =>
         {
-            _messages.Add($"[Sent by: {senderName}] {message}");
+            _messages.Add($"[{senderName}] {message}");
             InvokeAsync(StateHasChanged);
         });
         _hubConnection.On<string>("UserConnectedToRoom", (userName) =>
         {
-            _messages.Add($"User {userName} connected to room!");
+            _messages.Add($"{userName} dołączył do pokoju!");
             InvokeAsync(StateHasChanged);
         });
         _hubConnection.On<string>("ReceiveNotification", (notification) =>
         {
-            _messages.Add($"Notification: {notification}");
+            _messages.Add($"Informacja: {notification}");
         });
         _hubConnection.On<string, string>("ReceiveNewRoomCreated", (roomId, name) =>
         {
