@@ -14,7 +14,7 @@
     }
 </style>
 <div class="sidebar">
-    <div>
+    <div style="margin-left: 0.33rem; margin-top: 0.33rem">
         <div class="@(IsInARoom ? "hidden" : string.Empty)">
             <button @onclick="() => CreateRoom(NewRoomName)">Create Room</button><br/>
             <InputText class="inputText" @bind-Value="NewRoomName"></InputText>
@@ -25,7 +25,7 @@
 
         <br/>
     </div>
-    <div>
+    <div style="margin-left: 0.33rem">
         <button @onclick="ToggleRooms">Room list</button>
         <br/>
         <div class="@(RoomListHidden ? "hidden" : string.Empty)">
