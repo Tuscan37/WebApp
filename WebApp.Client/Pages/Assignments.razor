@@ -32,14 +32,16 @@
 
 <AuthorizeView Context="authContext">
     <Authorized>
+    <div style="text-align: center;">
         <h1>Zadania Projektu @project?.ProjectName</h1>
 
         @if (state != null && state.User.IsInRole("admin"))
         {
-            <button class="btn btn-primary" @onclick="ShowAddDialog">Dodaj Zadanie</button>
+            <button class="button mainaction submit btn btn-primary btn-lg text-uppercase w-30" @onclick="ShowAddDialog">Kliknij, aby dodać nowe zadanie</button>
+            <button class="button btn btn-secondary btn-lg text-uppercase w-30" @onclick="GoHome">Wróć do projektów</button>
 
             <!-- Dodaj nowe zadanie -->
-            <ModalDialog @ref="AddDialog" Title="Dodaj nowe zadanie">
+            <ModalDialog @ref="AddDialog" Title="Dodawanie Zadania">
                 <EditForm Model="@asgn">
                     <DataAnnotationsValidator />
                     <div class="form-group">
@@ -59,13 +61,14 @@
                         <ValidationMessage For="@(() => asgn.DeadlineDateTime)" />
                     </div>
                     <div class="form-group">
-                        <button class="btn btn-primary" @onclick="AddAssignment">Dodaj</button>
+                        <button class="btn  mainaction btn btn-primary btn-lg w-40" @onclick="AddAssignment">Dodaj</button>
+                        <button class="button mainaction btn btn-secondary btn-lg w-40" @onclick="() => AddDialog.Close()">Zamknij</button>
                     </div>
                 </EditForm>
             </ModalDialog>
 
             <!-- Edytuj zadanie -->
-            <ModalDialog @ref="EditDialog" Title="Edytuj zadanie">
+            <ModalDialog @ref="EditDialog" Title="Edycja zadania">
                 <EditForm Model="@asgn">
                     <DataAnnotationsValidator />
                     <div class="form-group">
@@ -84,25 +87,37 @@
                         <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="asgn.DeadlineDateTime" class="form-control" />
                         <ValidationMessage For="@(() => asgn.DeadlineDateTime)" />
                     </div>
-                    <div class="form-group">
-                        <button class="btn btn-primary" @onclick="UpdateAssignment">Zaktualizuj</button>
-                    </div>
+                    <p class="formbuttons">
+                        <div class="form-group">
+                            <button class="button mainaction btn btn-primary btn-lg w-40" @onclick="UpdateAssignment">Zatwierdź zmiany</button>
+                            <button class="button mainaction btn btn-secondary btn-lg w-40" @onclick="() => EditDialog.Close()">Zamknij</button>
+                            <button class="button mainaction btn btn-danger btn-lg w-40" @onclick="() => RemoveWarning.Open()">Usuń zadanie</button>
+                        </div>
+                    </p>
                 </EditForm>
             </ModalDialog>
-        }
+            
+            <ModalDialog @ref="RemoveWarning" Title="Usuń zadanie">
+                <br /><br />
+                <h1>Czy na pewno chcesz usunąć to zadanie?</h1>
+                <br /><br />
+                <button class="button mainaction btn btn-danger btn-lg w-40"
+                        @onclick="RemoveAssignment">TAK</button>
+                <button class="button mainaction btn btn-secondary btn-lg w-40"
+                        @onclick="() => RemoveWarning.Close()">NIE</button>
 
+            </ModalDialog>
+        }
+        </div>
         <!-- Lista zadań -->
-        <table class="table table-bordered">
+        <br/>
+        <table style="width:100%">
             <thead>
                 <tr>
-                    <th>Nazwa zadania</th>
-                    <th>Opis</th>
-                    <th>Priorytet</th>
-                    <th>Termin</th>
-                    @if (state != null && state.User.IsInRole("admin"))
-                    {
-                        <th>Akcje</th>
-                    }
+                    <th style="text-align: center;">Nazwa zadania</th>
+                    <th style="text-align: center;">Opis</th>
+                    <th style="text-align: center;">Priorytet</th>
+                    <th style="text-align: center;">Termin</th>
                 </tr>
             </thead>
             <tbody>
@@ -116,7 +131,7 @@
                         @if (state != null && state.User.IsInRole("admin"))
                         {
                             <td>
-                                <button class="btn btn-primary" @onclick="() => EditAssignment(assignment)">Edytuj</button>
+                                <button class="button btn btn-primary btn-lg w-100" @onclick="() => EditAssignment(assignment)">Zarządzaj</button>
                             </td>
                         }
                     </tr>
@@ -142,6 +157,7 @@
 
     private ModalDialog AddDialog { get; set; }
     private ModalDialog EditDialog { get; set; }
+    private ModalDialog RemoveWarning { get; set; }
     private AuthenticationState? state = null;
     private ProjectDto? project;
     private AssignmentDto asgn = new AssignmentDto();
@@ -179,6 +195,15 @@
         }
     }
 
+    private async Task RemoveAssignment()
+    {
+        asgn.Project = project;
+        await AssignmentService.DeleteAssignmentAsync(asgn);
+        EditDialog.Close();
+        RemoveWarning.Close();
+        assignments = await AssignmentService.GetAssignmentsByProjectIdAsync(ProjectId);
+    }
+    
     private void ShowAddDialog()
     {
         asgn = new AssignmentDto();
@@ -205,4 +230,10 @@
             Console.WriteLine($"Error updating assignment: {ex.Message}");
         }
     }
+
+    private void GoHome()
+    {
+        NavManager.NavigateTo($"/");
+    }
+
 }

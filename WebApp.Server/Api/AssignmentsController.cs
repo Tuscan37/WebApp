@@ -58,7 +58,7 @@ public class AssignmentsController : ControllerBase
             Name = assignmentDto.Name,
             Priority = assignmentDto.Priority,
             Description = assignmentDto.Description,
-            DeadlineDateTime = Convert.ToDateTime(assignmentDto.DeadlineDateTime).ToUniversalTime()
+            DeadlineDateTime = Convert.ToDateTime(assignmentDto.DeadlineDateTime).ToUniversalTime().AddMinutes(60)
         };
 
         _context.Assignments.Add(assignment);
@@ -87,7 +87,7 @@ public class AssignmentsController : ControllerBase
         assignment.Name = assignmentDto.Name;
         assignment.Priority = assignmentDto.Priority;
         assignment.Description = assignmentDto.Description;
-        assignment.DeadlineDateTime = Convert.ToDateTime(assignmentDto.DeadlineDateTime).ToUniversalTime();
+        assignment.DeadlineDateTime = Convert.ToDateTime(assignmentDto.DeadlineDateTime).ToUniversalTime().AddMinutes(60);
 
         await _context.SaveChangesAsync();
 

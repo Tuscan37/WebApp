@@ -30,9 +30,10 @@ public class ProjectService(HttpClient httpClient)
         var response = await httpClient.PutAsync($"{BaseUrl}/{proj.Id}", jsonContent);
         response.EnsureSuccessStatusCode();
     }
-        public async Task DeleteProject(int id)
+        public async Task DeleteProject(ProjectDto proj)
     {
-        var response = await httpClient.DeleteAsync($"{BaseUrl}/{id}");
+        using StringContent jsonContent = new(JsonConvert.SerializeObject(proj), Encoding.UTF8, "application/json");
+        var response = await httpClient.DeleteAsync($"{BaseUrl}/{proj.Id}");
         response.EnsureSuccessStatusCode();
     }
     public async Task<List<ProjectDto>> SearchProjectsAsync(string searchTerm)
